@@ -4,11 +4,13 @@ from time import time, sleep
 from env import cited_by_dictionary, cite_dictionary, query_dictionary, pagination_dictionary
 from env import CACHE_DIR, URL
 from env import logging
-
+import json as jsonlib
 
 
 def title2file(string):
-    """Makes a filename from a publication title by replacing special characters with escape codes."""
+    """Makes a filename from a publication title by replacing special
+    characters with escape codes."""
+
     for replacee, replacement in (('-', '.dash.'),
                                   (', ', ','),  # commas are allowed
                                   (' ', '-'),
@@ -83,13 +85,14 @@ class Checker:
 
 
 global_checker = Checker()
-global_cache = [f.name for f in pathlib(f'{CACHE_DIR}').iterdir()]
+global_cache = [f.name for f in pathlib.Path(f'{CACHE_DIR}').iterdir()]
 
 
 class Citation:
     def __init__(self,
                  mla,
                  apa,
+                 chicago,
                  harvard,
                  vancouver,
                  bibtex,
@@ -98,6 +101,7 @@ class Citation:
                  refworks):
         self.mla = mla
         self.apa = apa
+        self.chicago = chicago
         self.harvard = harvard
         self.vancouver = vancouver
         self.bibtex = bibtex
@@ -110,7 +114,7 @@ class Citation:
         d = {d['title'].lower(): d['snippet'] for d in json['citations']}
         for ldct in json['links']:
             # eventually, follow some of these links
-            d[ldct['name']] = ldct['link']
+            d[ldct['name'].lower()] = ldct['link']
         return cls(**d)
 
 
@@ -121,6 +125,7 @@ class Publication:
                  position,
                  result_id,
                  cites_id,
+                 abstract,
                  publication_summary,
                  authors_summary,
                  cited_by_count,
@@ -164,23 +169,23 @@ class Publication:
         except KeyError:
             d['cites_id'] = None
 
-        inst = cls(d)
+        inst = cls(**d)
         inst.cache_json(json)
         return inst
 
     def cache_json(self, json):
         global_cache.append(self.file)
         with open(f'{CACHE_DIR}/{self.file}', 'w') as _:
-            _.write(json)
+            _.write(jsonlib.dumps(json))
         return None
 
     def get_cited_by(self):
         if self.cites_id is None:
-            logging.info(self.indent + 'no citing articles for {self.title}')
+            logging.info(self.indent + f'no citing articles for {self.title}')
             self.neighbors = []
             return self.neighbors
         cited_by_dictionary['cites'] = self.cites_id
-        logging.info(self.indent + 'getting cited by results for {self.title}')
+        logging.info(self.indent + f'getting cited by results for {self.title}')
         dt, data = json_request(cited_by_dictionary)
         logging.info(self.indent + f'took {dt}s')
         global_checker.increment()
@@ -192,11 +197,11 @@ class Publication:
             result, level=self.level+1) for result in data]
         return self.neighbors
 
-    def get_cite(self, result_id):
+    def get_cite(self):
         cite_dictionary['q'] = self.result_id
-        logging.info(self.indent + 'getting cite data for {self.title}')
+        logging.info(self.indent + f'getting cite data for {self.title}')
         dt, data = json_request(cite_dictionary)
-        logging.info(self.indent + 'took {dt}s')
+        logging.info(self.indent + f'took {dt}s')
         global_checker.increment()
         self.cite = Citation.from_json(data)
         return self.cite
@@ -206,7 +211,9 @@ def query(query_term):
     logging.info(f'finding first page in query for term:{query_term}')
     dt, data = json_request(query_dictionary)
     logging.info(f'found in {dt}s')
+    global_checker.increment()
     logging.info(f'querying and flattening pagination')
     dt, data = flatten_pagination(data)
     logging.info(f'took {dt}s for {len(data)} results')
+    global_checker.increment()
     return [Publication.from_json(d) for d in data]
