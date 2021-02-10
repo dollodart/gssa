@@ -28,6 +28,12 @@ def json_request(parameters):
     data = requests.get(URL, params=parameters)
     return time() - t0, data.json()
 
+def cache(data, filename):
+    global_cache.append(filename)
+    with open(f'{CACHE_DIR}/{filename}', 'w') as _:
+        _.write(jsonlib.dumps(data))
+    return None
+
 def flatten_pagination(data, level=0):
     """Given data with a link to more pages, get all the data and then
     return a flattened data structure."""
@@ -132,7 +138,6 @@ class Publication:
                  level=0
                  ):
         self.title = title
-        self.file = title2file(self.title)
         self.result_id = result_id
         self.cites_id = cites_id
         self.publication_summary = publication_summary
@@ -170,14 +175,8 @@ class Publication:
             d['cites_id'] = None
 
         inst = cls(**d)
-        inst.cache_json(json)
+        cache(json, title2file(inst.title))
         return inst
-
-    def cache_json(self, json):
-        global_cache.append(self.file)
-        with open(f'{CACHE_DIR}/{self.file}', 'w') as _:
-            _.write(jsonlib.dumps(json))
-        return None
 
     def get_cited_by(self):
         if self.cites_id is None:
@@ -204,7 +203,9 @@ class Publication:
         logging.info(self.indent + f'took {dt}s')
         global_checker.increment()
         self.cite = Citation.from_json(data)
+        cache(data, title2file(self.title) + '-cite')
         return self.cite
+
 
 def query(query_term):
     query_dictionary['q'] = query_term
