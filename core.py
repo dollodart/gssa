@@ -92,8 +92,29 @@ class Checker:
 
 global_checker = Checker()
 global_cache = [f.name for f in pathlib.Path(f'{CACHE_DIR}').iterdir()]
-global_indent = '  '
 
+class Indent:
+    def __init__(self):
+        self.indent = 0
+    def __add__(self, other): 
+        # should also be used for __radd__ in case of `3 + indent` or similar
+        if type(other) is int:
+            self.indent += other
+        elif type(other) is Indent:
+            self.indent += other.indent
+        elif type(other) is str:
+            return str(self) + other
+    def __sub__(self, other):
+        if type(other) is int:
+            self.indent -= other
+        elif type(other) is Indent:
+            self.indent += other.indent
+    def __str__(self):
+        if self.indent > 0:
+            return ' '*self.indent
+        return ''
+
+global_indent = Indent()
 
 class Citation:
     def __init__(self,
