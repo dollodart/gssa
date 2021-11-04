@@ -34,7 +34,7 @@ def cache(data, filename):
         _.write(jsonlib.dumps(data))
     return None
 
-def flatten_pagination(data, level=0):
+def flatten_pagination(data):
     """Given data with a link to more pages, get all the data and then
     return a flattened data structure."""
 
@@ -45,7 +45,7 @@ def flatten_pagination(data, level=0):
         try:
             link = data['serpapi_pagination']['next']
             dt, data = json_request(link, pagination_dictionary)
-            logging.info(2 * level * ' ' + 'pulled another page')
+            logging.info(global_indent + 'pulled another page')
             global_checker.increment()
         except KeyError:
             break
@@ -92,6 +92,7 @@ class Checker:
 
 global_checker = Checker()
 global_cache = [f.name for f in pathlib.Path(f'{CACHE_DIR}').iterdir()]
+global_indent = '  '
 
 
 class Citation:
@@ -134,8 +135,7 @@ class Publication:
                  abstract,
                  publication_summary,
                  authors_summary,
-                 cited_by_count,
-                 level=0
+                 cited_by_count
                  ):
         self.title = title
         self.result_id = result_id
@@ -143,16 +143,13 @@ class Publication:
         self.publication_summary = publication_summary
         self.authors_summary = authors_summary
         self.cited_by_count = cited_by_count
-        self.level = level
-
-        self.indent = self.level * 2 * ' '
 
         # these attributes must exist to check, but can be None type
         self._cite = None
         self._cited_by = None
 
     @classmethod
-    def from_json(cls, json, level=0):
+    def from_json(cls, json):
         """
         Initialize a publication from a search result.
         """
@@ -162,8 +159,7 @@ class Publication:
             position=json['position'],
             result_id=json['result_id'],
             abstract=json['snippet'],
-            publication_summary=json['publication_info']['summary'],
-            level=level)
+            publication_summary=json['publication_info']['summary'])
         try:
             d['authors_summary'] = [x['name']
                                     for x in json['publication_info']['authors']]
@@ -186,7 +182,7 @@ class Publication:
         if overwrite:
             self.query_cited_by()
         elif self.cites_id is None:
-            logging.info(self.indent + f'no citing articles for {self.title}')
+            logging.info(global_indent + f'no citing articles for {self.title}')
             self._cited_by = []
         elif self._cited_by is None: 
             self.query_cited_by()
@@ -194,16 +190,15 @@ class Publication:
 
     def query_cited_by(self):
         cited_by_dictionary['cites'] = self.cites_id
-        logging.info(self.indent + f'getting cited by results for {self.title}')
+        logging.info(global_indent + f'getting cited by results for {self.title}')
         dt, data = json_request(cited_by_dictionary)
-        logging.info(self.indent + f'took {dt}s')
+        logging.info(global_indent + f'took {dt}s')
         global_checker.increment()
         # flatten the pagination (makes queries)
-        logging.info(self.indent + 'querying and flattening paginated results')
-        dt, data = flatten_pagination(data, level=self.level)
-        logging.info(self.indent + f'took {dt}s for {len(data)} results')
-        self._cited_by = [Publication.from_json(
-            result, level=self.level+1) for result in data]
+        logging.info(global_indent + 'querying and flattening paginated results')
+        dt, data = flatten_pagination(data)
+        logging.info(global_indent + f'took {dt}s for {len(data)} results')
+        self._cited_by = [Publication.from_json(result) for result in data]
 
     def get_cite(self, overwrite=False):
         if overwrite:
@@ -214,9 +209,9 @@ class Publication:
 
     def query_cite(self):
         cite_dictionary['q'] = self.result_id
-        logging.info(self.indent + f'getting cite data for {self.title}')
+        logging.info(global_indent + f'getting cite data for {self.title}')
         dt, data = json_request(cite_dictionary)
-        logging.info(self.indent + f'took {dt}s')
+        logging.info(global_indent + f'took {dt}s')
         global_checker.increment()
         self._cite = Citation.from_json(data)
         cache(data, title2file(self.title) + '-cite')
