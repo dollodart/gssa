@@ -147,6 +147,10 @@ class Publication:
 
         self.indent = self.level * 2 * ' '
 
+        # these attributes must exist to check, but can be None type
+        self._cite = None
+        self._cited_by = None
+
     @classmethod
     def from_json(cls, json, level=0):
         """
@@ -178,11 +182,17 @@ class Publication:
         cache(json, title2file(inst.title))
         return inst
 
-    def get_cited_by(self):
-        if self.cites_id is None:
+    def get_cited_by(self, overwrite=False):
+        if overwrite:
+            self.query_cited_by()
+        elif self.cites_id is None:
             logging.info(self.indent + f'no citing articles for {self.title}')
-            self.neighbors = []
-            return self.neighbors
+            self._cited_by = []
+        elif self._cited_by is None: 
+            self.query_cited_by()
+        return self._cited_by
+
+    def query_cited_by(self):
         cited_by_dictionary['cites'] = self.cites_id
         logging.info(self.indent + f'getting cited by results for {self.title}')
         dt, data = json_request(cited_by_dictionary)
@@ -192,19 +202,24 @@ class Publication:
         logging.info(self.indent + 'querying and flattening paginated results')
         dt, data = flatten_pagination(data, level=self.level)
         logging.info(self.indent + f'took {dt}s for {len(data)} results')
-        self.neighbors = [Publication.from_json(
+        self._cited_by = [Publication.from_json(
             result, level=self.level+1) for result in data]
-        return self.neighbors
 
-    def get_cite(self):
+    def get_cite(self, overwrite=False):
+        if overwrite:
+            self.query_cite()
+        elif self._cite is None:
+            self.query_cite()
+        return self._cite
+
+    def query_cite(self):
         cite_dictionary['q'] = self.result_id
         logging.info(self.indent + f'getting cite data for {self.title}')
         dt, data = json_request(cite_dictionary)
         logging.info(self.indent + f'took {dt}s')
         global_checker.increment()
-        self.cite = Citation.from_json(data)
+        self._cite = Citation.from_json(data)
         cache(data, title2file(self.title) + '-cite')
-        return self.cite
 
 
 def query(query_term):
