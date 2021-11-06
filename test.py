@@ -1,9 +1,10 @@
 import core
-from dummy import DUMMY_DATA, dummy_request
+from dummy import DUMMY_DATA_ORGANIC_RESULT, dummy_reqget, dummy_json_request
 
-core.json_request = dummy_request
+core.reqget = dummy_reqget
+core.json_request = dummy_json_request
 core.query('my_query')
-pub = core.Publication.from_json(DUMMY_DATA)
+pub = core.Publication.from_json(DUMMY_DATA_ORGANIC_RESULT)
 pub.get_cite()
 core.global_indent += 2
 pub.get_cited_by()

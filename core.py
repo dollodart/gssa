@@ -90,9 +90,12 @@ global_indent = Indent()
 global_checker = Checker()
 global_cache = [f.name for f in pathlib.Path(f'{CACHE_DIR}').iterdir()]
 
+def reqget(URL, params): # can be overridden
+    return requests.get(URL, params=params)
+
 def json_request(parameters):
     t0 = time()
-    data = requests.get(URL, params=parameters)
+    data = reqget(URL, params=parameters)
     return time() - t0, data.json()
 
 def cache(data, filename):
@@ -111,7 +114,7 @@ def flatten_pagination(data):
         lst.extend(data['organic_results'])
         try:
             link = data['serpapi_pagination']['next']
-            dt, data = json_request(link, pagination_dictionary)
+            dt, data = reqget(link, params=pagination_dictionary)
             logging.info(global_indent + 'pulled another page')
             global_checker.increment()
         except KeyError:
