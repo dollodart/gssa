@@ -2,6 +2,7 @@ import core
 
 DUMMY_DATA = {
         'title':'dummy()',
+        'link':None,
         'position':None,
         'result_id':None,
         'snippet':None,

@@ -23,35 +23,6 @@ def title2file(string):
 
     return string
 
-def json_request(parameters):
-    t0 = time()
-    data = requests.get(URL, params=parameters)
-    return time() - t0, data.json()
-
-def cache(data, filename):
-    global_cache.append(filename)
-    with open(f'{CACHE_DIR}/{filename}', 'w') as _:
-        _.write(jsonlib.dumps(data))
-    return None
-
-def flatten_pagination(data):
-    """Given data with a link to more pages, get all the data and then
-    return a flattened data structure."""
-
-    t0 = time()
-    lst = []
-    while True:
-        lst.extend(data['organic_results'])
-        try:
-            link = data['serpapi_pagination']['next']
-            dt, data = json_request(link, pagination_dictionary)
-            logging.info(global_indent + 'pulled another page')
-            global_checker.increment()
-        except KeyError:
-            break
-    return time() - t0, lst
-
-
 class Checker:
     hourly_limit = 1000
 
@@ -90,9 +61,6 @@ class Checker:
             self.fail = 0
 
 
-global_checker = Checker()
-global_cache = [f.name for f in pathlib.Path(f'{CACHE_DIR}').iterdir()]
-
 class Indent:
     def __init__(self):
         self.indent = 0
@@ -114,7 +82,38 @@ class Indent:
             return ' '*self.indent
         return ''
 
+# decleration of global instances (all references should come later)
 global_indent = Indent()
+global_checker = Checker()
+global_cache = [f.name for f in pathlib.Path(f'{CACHE_DIR}').iterdir()]
+
+def json_request(parameters):
+    t0 = time()
+    data = requests.get(URL, params=parameters)
+    return time() - t0, data.json()
+
+def cache(data, filename):
+    global_cache.append(filename)
+    with open(f'{CACHE_DIR}/{filename}', 'w') as _:
+        _.write(jsonlib.dumps(data))
+    return None
+
+def flatten_pagination(data):
+    """Given data with a link to more pages, get all the data and then
+    return a flattened data structure."""
+
+    t0 = time()
+    lst = []
+    while True:
+        lst.extend(data['organic_results'])
+        try:
+            link = data['serpapi_pagination']['next']
+            dt, data = json_request(link, pagination_dictionary)
+            logging.info(global_indent + 'pulled another page')
+            global_checker.increment()
+        except KeyError:
+            break
+    return time() - t0, lst
 
 class Citation:
     def __init__(self,
@@ -145,8 +144,6 @@ class Citation:
             d[ldct['name'].lower()] = ldct['link']
         return cls(**d)
 
-
-
 class Publication:
     def __init__(self,
                  title,
@@ -156,11 +153,13 @@ class Publication:
                  abstract,
                  publication_summary,
                  authors_summary,
-                 cited_by_count
+                 cited_by_count,
+                 link
                  ):
         self.title = title
         self.result_id = result_id
         self.cites_id = cites_id
+        self.abstract = abstract
         self.publication_summary = publication_summary
         self.authors_summary = authors_summary
         self.cited_by_count = cited_by_count
@@ -180,7 +179,9 @@ class Publication:
             position=json['position'],
             result_id=json['result_id'],
             abstract=json['snippet'],
-            publication_summary=json['publication_info']['summary'])
+            publication_summary=json['publication_info']['summary'],
+            link=json['link']
+            )
         try:
             d['authors_summary'] = [x['name']
                                     for x in json['publication_info']['authors']]
@@ -221,6 +222,9 @@ class Publication:
         logging.info(global_indent + f'took {dt}s for {len(data)} results')
         self._cited_by = [Publication.from_json(result) for result in data]
 
+    def set_cited_by(self, cited_by):
+        self._cited_by = cited_by
+
     def get_cite(self, overwrite=False):
         if overwrite:
             self.query_cite()
@@ -236,6 +240,9 @@ class Publication:
         global_checker.increment()
         self._cite = Citation.from_json(data)
         cache(data, title2file(self.title) + '-cite')
+
+    def set_cite(self, cite):
+        self._cite = cite
 
 
 def query(query_term):
