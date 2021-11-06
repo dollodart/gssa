@@ -68,8 +68,10 @@ class Indent:
         # should also be used for __radd__ in case of `3 + indent` or similar
         if type(other) is int:
             self.indent += other
+            return self
         elif type(other) is Indent:
             self.indent += other.indent
+            return self
         elif type(other) is str:
             return str(self) + other
     def __sub__(self, other):
@@ -77,6 +79,7 @@ class Indent:
             self.indent -= other
         elif type(other) is Indent:
             self.indent += other.indent
+        return self
     def __str__(self):
         if self.indent > 0:
             return ' '*self.indent
