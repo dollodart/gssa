@@ -1,6 +1,6 @@
 import core
 
-def depth_first_search(pub, levels=1, filters=tuple()):
+def depth_first_search(pub, levels=1, filters=tuple(), black=[]):
     if levels == 0:
         return
 
@@ -8,14 +8,19 @@ def depth_first_search(pub, levels=1, filters=tuple()):
         if not f(pub):
             return
 
+    if pub in black:
+        return
+    else:
+        black.append(pub)
+
     core.global_indent += 2
     pub.get_cite()
     for x in pub.get_cited_by():
-        depth_first_search(x, levels-1)
+        depth_first_search(x, levels-1, filters, black)
 
     core.global_indent -= 2
 
-def breadth_first_search(publist, levels=1, filters=tuple()):
+def breadth_first_search(publist, levels=1, filters=tuple(), black=[]):
 
     if levels == 0:
         # core.global_indent -= core.global_indent # return to 0
@@ -32,7 +37,11 @@ def breadth_first_search(publist, levels=1, filters=tuple()):
         for f in filters:
             if not f(pub):
                 continue
+        if pub in black:
+            continue
+        else:
+            black.append(pub)
         pub.get_cite()
         next_breadth.extend(pub.get_cited_by())
 
-    breadth_first_search(next_breadth, levels-1, filters)
+    breadth_first_search(next_breadth, levels-1, filters, black)
