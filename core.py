@@ -74,6 +74,15 @@ class Indent:
             return self
         elif type(other) is str:
             return str(self) + other
+    def __radd__(self, other):
+        if type(other) is int:
+            self.indent += other
+            return self
+        elif type(other) is Indent:
+            self.indent += other.indent
+            return self
+        elif type(other) is str:
+            return other + str(self)
     def __sub__(self, other):
         if type(other) is int:
             self.indent -= other
@@ -157,6 +166,7 @@ class Citation:
         return cls(**d)
 
 class Publication:
+    publist = dict()
     def __init__(self,
                  title,
                  position,
@@ -180,11 +190,26 @@ class Publication:
         self._cite = None
         self._cited_by = None
 
+        try:
+            self.__class__.publist[self.title]
+            logging.warn('initialized publication when there already exists'
+            ' a publication with the same title in application memory')
+        except KeyError:
+            self.__class__.publist[self.title] = self
+
     @classmethod
     def from_json(cls, json):
         """
         Initialize a publication from a search result.
         """
+
+        try:
+            r = cls.publist[json['title']]
+            logging.info(global_indent + f'Publication object with title {json["title"]}\n' + 
+                         global_indent + 'already in memory, returning') 
+            return r
+        except KeyError:
+            pass
 
         d = dict(
             title=json['title'],
@@ -223,7 +248,7 @@ class Publication:
             if cache_res is None:
                 self.query_cited_by()
             else:
-                self._cited_by = [Publication.from_json(result) for result in data]
+                self._cited_by = [Publication.from_json(result) for result in cache_res]
         return self._cited_by
 
     def query_cited_by(self):
