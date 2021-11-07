@@ -104,6 +104,12 @@ def cache(data, filename):
         _.write(jsonlib.dumps(data))
     return None
 
+def load_cache(filename):
+    if filename in global_cache:
+        with open(f'{CACHE_DIR}/{filename}', 'r') as _:
+            return jsonlib.load(_)
+    return None
+
 def flatten_pagination(data):
     """Given data with a link to more pages, get all the data and then
     return a flattened data structure."""
@@ -213,7 +219,11 @@ class Publication:
             logging.info(global_indent + f'no citing articles for {self.title}')
             self._cited_by = []
         elif self._cited_by is None: 
-            self.query_cited_by()
+            cache_res = load_cache(title2file(self.title) + '-cited-by')
+            if cache_res is None:
+                self.query_cited_by()
+            else:
+                self._cited_by = [Publication.from_json(result) for result in data]
         return self._cited_by
 
     def query_cited_by(self):
@@ -227,6 +237,7 @@ class Publication:
         dt, data = flatten_pagination(data)
         logging.info(global_indent + f'took {dt}s for {len(data)} results')
         self._cited_by = [Publication.from_json(result) for result in data]
+        cache(data, title2file(self.title) + '-cited-by')
 
     def set_cited_by(self, cited_by):
         self._cited_by = cited_by
@@ -235,7 +246,11 @@ class Publication:
         if overwrite:
             self.query_cite()
         elif self._cite is None:
-            self.query_cite()
+            cache_res = load_cache(title2file(self.title) + '-cite')
+            if cache_res is None:
+                self.query_cite()
+            else:
+                self._cite = Citation.from_json(cache_res)
         return self._cite
 
     def query_cite(self):
