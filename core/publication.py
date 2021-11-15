@@ -5,7 +5,7 @@ from env import cited_by_dictionary, cite_dictionary, query_dictionary, paginati
 from env import CACHE_DIR, URL
 from env import logging
 from env import global_indent, global_checker, global_cache
-from core.query import flatten_pagination, cache, load_cache
+from query import flatten_pagination, cache, load_cache
 import json as jsonlib
 
 

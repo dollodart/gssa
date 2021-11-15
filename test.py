@@ -1,10 +1,13 @@
-import core
 import env
-from dummy import DUMMY_DATA_ORGANIC_RESULT, dummy_reqget, dummy_json_request
 
-core.query.reqget = dummy_reqget
-core.query.json_request = dummy_json_request
-#core.search('DUMMY_SEARCH')
+import query
+from dummy import DUMMY_DATA_ORGANIC_RESULT, dummy_reqget, dummy_json_request
+query.reqget = dummy_reqget
+query.json_request = dummy_json_request
+
+import core
+
+core.search('DUMMY_SEARCH')
 pub = core.Publication.from_json(DUMMY_DATA_ORGANIC_RESULT)
 pub.get_cite()
 env.global_indent += 2

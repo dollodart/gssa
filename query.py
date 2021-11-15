@@ -1,8 +1,8 @@
 import requests
-from env import CACHE_DIR, URL
-from env import query_dictionary, pagination_dictionary
-from env import logging
-from env import global_checker, global_cache
+from .env import CACHE_DIR, URL
+from .env import query_dictionary, pagination_dictionary
+from .env import logging
+from .env import global_checker, global_cache
 from time import time
 import json as jsonlib
 

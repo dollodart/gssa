@@ -4,7 +4,7 @@ from env import query_dictionary, pagination_dictionary
 from env import logging
 from env import global_checker
 from time import time
-from core.query import json_request, flatten_pagination
+from query import json_request, flatten_pagination
 from core.publication import Publication
 
 def search(query_term):
