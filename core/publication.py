@@ -1,11 +1,11 @@
 import pathlib
 import requests
 from time import time, sleep
-from env import cited_by_dictionary, cite_dictionary, query_dictionary, pagination_dictionary
-from env import CACHE_DIR, URL
-from env import logging
-from env import global_indent, global_checker, global_cache
-from query import flatten_pagination, cache, load_cache
+from serp.env import cited_by_dictionary, cite_dictionary, query_dictionary, pagination_dictionary
+from serp.env import CACHE_DIR, URL
+from serp.env import logging
+from serp.env import global_indent, global_checker, global_cache
+from serp.query import flatten_pagination, cache, load_cache
 import json as jsonlib
 
 

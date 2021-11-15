@@ -1,2 +1,2 @@
-from core.publication import Publication
-from core.search import search
+from .publication import Publication
+from .search import search
