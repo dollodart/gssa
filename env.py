@@ -1,6 +1,8 @@
 import yaml
 import logging
 import logging.config as lconfig
+import pathlib
+from util import Indent, Checker
 
 SERP_API_KEY = 'myapikey'
 CACHE_DIR = 'output'
@@ -28,3 +30,7 @@ pagination_dictionary = dict(serp_api_key=SERP_API_KEY)
 with open('logger.yaml', 'r') as _:
     dct = yaml.load(_, Loader=yaml.Loader)
     lconfig.dictConfig(dct)
+# decleration of global instances (all references should come later)
+global_indent = Indent()
+global_checker = Checker()
+global_cache = [f.name for f in pathlib.Path(f'{CACHE_DIR}').iterdir()]
