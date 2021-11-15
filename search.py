@@ -1,4 +1,5 @@
-import core
+import serp.core
+import serp.env
 
 def depth_first_search(pub, levels=1, filters=tuple(), black=[]):
     if levels == 0:
@@ -13,12 +14,12 @@ def depth_first_search(pub, levels=1, filters=tuple(), black=[]):
     else:
         black.append(pub)
 
-    core.global_indent += 2
+    serp.env.global_indent += 2
     pub.get_cite()
     for x in pub.get_cited_by():
         depth_first_search(x, levels-1, filters, black)
 
-    core.global_indent -= 2
+    serp.env.global_indent -= 2
 
 def breadth_first_search(publist, levels=1, filters=tuple(), black=[]):
 
@@ -30,7 +31,7 @@ def breadth_first_search(publist, levels=1, filters=tuple(), black=[]):
     if type(publist) not in [list, tuple]:
         publist = [publist]
 
-    core.global_indent += 2
+    serp.env.global_indent += 2
 
     next_breadth = []
     for pub in publist:

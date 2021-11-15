@@ -1,11 +1,13 @@
 import pathlib
 import requests
 from time import time, sleep
-from env import cited_by_dictionary, cite_dictionary, query_dictionary, pagination_dictionary
-from env import CACHE_DIR, URL
-from env import core_logger
+from serp.env import core_logger
+from serp.env import cited_by_dictionary, cite_dictionary, query_dictionary, pagination_dictionary
+from serp.env import CACHE_DIR, URL
+from serp.env import logging
+from serp.env import global_indent, global_checker, global_cache
+from serp.query import flatten_pagination, cache, load_cache
 import json as jsonlib
-
 
 def title2file(string):
     """Makes a filename from a publication title by replacing special
@@ -22,119 +24,6 @@ def title2file(string):
         string = string.replace(replacee, replacement)
 
     return string
-
-class Checker:
-    hourly_limit = 1000
-
-    def __init__(self, cum_search=0, fail_thresh=10):
-        self.cum_search = cum_search
-        self.fail = 0
-        self.fail_thresh = fail_thresh
-
-    def increment(self):
-        self.cum_search += 1
-        if self.cum_search > self.hourly_limit * 0.95:
-            core_logger.info('##\n'
-                         f'past hourly limit of {self.hourly_limit}, sleeping until limit refresh')
-            sleep(3600)
-            self.cum_search = 0
-
-    def increment_failure(self):
-        self.fail += 1
-        if self.fail > self.fail_thresh:
-            i = input(
-                'there have been greater than 10 failures, continue? [y/N]: ')
-            if i == 'y':
-                fail_thresh = input(
-                    'input an integer number for failure threshold [10]: ')
-                while True:
-                    if fail_thresh:
-                        try:
-                            self.fail_thresh = int(fail_thresh)
-                            break
-                        except ValueError:
-                            fail_thresh = input(
-                                'try again, input an integer number of failures [10]: ')
-                    else:
-                        self.fail_thresh = 10
-                        break
-            self.fail = 0
-
-
-class Indent:
-    def __init__(self):
-        self.indent = 0
-    def __add__(self, other): 
-        # should also be used for __radd__ in case of `3 + indent` or similar
-        if type(other) is int:
-            self.indent += other
-            return self
-        elif type(other) is Indent:
-            self.indent += other.indent
-            return self
-        elif type(other) is str:
-            return str(self) + other
-    def __radd__(self, other):
-        if type(other) is int:
-            self.indent += other
-            return self
-        elif type(other) is Indent:
-            self.indent += other.indent
-            return self
-        elif type(other) is str:
-            return other + str(self)
-    def __sub__(self, other):
-        if type(other) is int:
-            self.indent -= other
-        elif type(other) is Indent:
-            self.indent += other.indent
-        return self
-    def __str__(self):
-        if self.indent > 0:
-            return ' '*self.indent
-        return ''
-
-# decleration of global instances (all references should come later)
-global_indent = Indent()
-global_checker = Checker()
-global_cache = [f.name for f in pathlib.Path(f'{CACHE_DIR}').iterdir()]
-
-def reqget(URL, params): # can be overridden
-    return requests.get(URL, params=params)
-
-def json_request(parameters):
-    t0 = time()
-    data = reqget(URL, params=parameters)
-    return time() - t0, data.json()
-
-def cache(data, filename):
-    global_cache.append(filename)
-    with open(f'{CACHE_DIR}/{filename}', 'w') as _:
-        _.write(jsonlib.dumps(data))
-    return None
-
-def load_cache(filename):
-    if filename in global_cache:
-        with open(f'{CACHE_DIR}/{filename}', 'r') as _:
-            return jsonlib.load(_)
-    return None
-
-def flatten_pagination(data):
-    """Given data with a link to more pages, get all the data and then
-    return a flattened data structure."""
-
-    t0 = time()
-    lst = []
-    while True:
-        lst.extend(data['organic_results'])
-        try:
-            link = data['serpapi_pagination']['next']
-            dt, data = reqget(link, params=pagination_dictionary)
-            core_logger.info(global_indent + 'pulled another page')
-            global_checker.increment()
-        except KeyError:
-            break
-    return time() - t0, lst
 
 class Citation:
     def __init__(self,
@@ -156,6 +45,13 @@ class Citation:
         self.endnote = endnote
         self.refman = refman
         self.refworks = refworks
+
+        # there is some data which can be consistently obtained from these citations
+        # but other data cannot be
+        try:
+            self.authors = self.vancouver.split('.')[0].split(',')
+        except Exception:
+            self.authors = []
 
     @classmethod
     def from_json(cls, json):
@@ -289,16 +185,3 @@ class Publication:
 
     def set_cite(self, cite):
         self._cite = cite
-
-
-def query(query_term):
-    query_dictionary['q'] = query_term
-    core_logger.info(f'finding first page in query for term:{query_term}')
-    dt, data = json_request(query_dictionary)
-    core_logger.info(f'found in {dt}s')
-    global_checker.increment()
-    core_logger.info(f'querying and flattening pagination')
-    dt, data = flatten_pagination(data)
-    core_logger.info(f'took {dt}s for {len(data)} results')
-    global_checker.increment()
-    return [Publication.from_json(d) for d in data]
