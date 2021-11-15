@@ -28,3 +28,5 @@ pagination_dictionary = dict(serp_api_key=SERP_API_KEY)
 with open('logger.yaml', 'r') as _:
     dct = yaml.load(_, Loader=yaml.Loader)
     lconfig.dictConfig(dct)
+
+core_logger = logging.getLogger('core_logger')

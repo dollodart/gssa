@@ -8,15 +8,15 @@ handlers:
     level: DEBUG
     formatter: simple
     stream: ext://sys.stdout
-  file:
+  core_file:
     class: logging.FileHandler
     level: INFO
     formatter: simple
-    filename: authorpull.log
+    filename: core.log
 loggers:
-  authorpulllogger: 
-    level: DEBUG
-    handlers: [console, file]
+  core_logger: 
+    level: INFO
+    handlers: [core_file]
     propagate: no
 root:
   level: DEBUG

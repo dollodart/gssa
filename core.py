@@ -3,7 +3,7 @@ import requests
 from time import time, sleep
 from env import cited_by_dictionary, cite_dictionary, query_dictionary, pagination_dictionary
 from env import CACHE_DIR, URL
-from env import logging
+from env import core_logger
 import json as jsonlib
 
 
@@ -34,7 +34,7 @@ class Checker:
     def increment(self):
         self.cum_search += 1
         if self.cum_search > self.hourly_limit * 0.95:
-            logging.info('##\n'
+            core_logger.info('##\n'
                          f'past hourly limit of {self.hourly_limit}, sleeping until limit refresh')
             sleep(3600)
             self.cum_search = 0
@@ -130,7 +130,7 @@ def flatten_pagination(data):
         try:
             link = data['serpapi_pagination']['next']
             dt, data = reqget(link, params=pagination_dictionary)
-            logging.info(global_indent + 'pulled another page')
+            core_logger.info(global_indent + 'pulled another page')
             global_checker.increment()
         except KeyError:
             break
@@ -192,7 +192,7 @@ class Publication:
 
         try:
             self.__class__.publist[self.title]
-            logging.warn('initialized publication when there already exists'
+            core_logger.warn('initialized publication when there already exists'
             ' a publication with the same title in application memory')
         except KeyError:
             self.__class__.publist[self.title] = self
@@ -205,7 +205,7 @@ class Publication:
 
         try:
             r = cls.publist[json['title']]
-            logging.info(global_indent + f'Publication object with title {json["title"]}\n' + 
+            core_logger.info(global_indent + f'Publication object with title {json["title"]}\n' + 
                          global_indent + 'already in memory, returning') 
             return r
         except KeyError:
@@ -241,7 +241,7 @@ class Publication:
         if overwrite:
             self.query_cited_by()
         elif self.cites_id is None:
-            logging.info(global_indent + f'no citing articles for {self.title}')
+            core_logger.info(global_indent + f'no citing articles for {self.title}')
             self._cited_by = []
         elif self._cited_by is None: 
             cache_res = load_cache(title2file(self.title) + '-cited-by')
@@ -253,14 +253,14 @@ class Publication:
 
     def query_cited_by(self):
         cited_by_dictionary['cites'] = self.cites_id
-        logging.info(global_indent + f'getting cited by results for {self.title}')
+        core_logger.info(global_indent + f'getting cited by results for {self.title}')
         dt, data = json_request(cited_by_dictionary)
-        logging.info(global_indent + f'took {dt}s')
+        core_logger.info(global_indent + f'took {dt}s')
         global_checker.increment()
         # flatten the pagination (makes queries)
-        logging.info(global_indent + 'querying and flattening paginated results')
+        core_logger.info(global_indent + 'querying and flattening paginated results')
         dt, data = flatten_pagination(data)
-        logging.info(global_indent + f'took {dt}s for {len(data)} results')
+        core_logger.info(global_indent + f'took {dt}s for {len(data)} results')
         self._cited_by = [Publication.from_json(result) for result in data]
         cache(data, title2file(self.title) + '-cited-by')
 
@@ -280,9 +280,9 @@ class Publication:
 
     def query_cite(self):
         cite_dictionary['q'] = self.result_id
-        logging.info(global_indent + f'getting cite data for {self.title}')
+        core_logger.info(global_indent + f'getting cite data for {self.title}')
         dt, data = json_request(cite_dictionary)
-        logging.info(global_indent + f'took {dt}s')
+        core_logger.info(global_indent + f'took {dt}s')
         global_checker.increment()
         self._cite = Citation.from_json(data)
         cache(data, title2file(self.title) + '-cite')
@@ -293,12 +293,12 @@ class Publication:
 
 def query(query_term):
     query_dictionary['q'] = query_term
-    logging.info(f'finding first page in query for term:{query_term}')
+    core_logger.info(f'finding first page in query for term:{query_term}')
     dt, data = json_request(query_dictionary)
-    logging.info(f'found in {dt}s')
+    core_logger.info(f'found in {dt}s')
     global_checker.increment()
-    logging.info(f'querying and flattening pagination')
+    core_logger.info(f'querying and flattening pagination')
     dt, data = flatten_pagination(data)
-    logging.info(f'took {dt}s for {len(data)} results')
+    core_logger.info(f'took {dt}s for {len(data)} results')
     global_checker.increment()
     return [Publication.from_json(d) for d in data]
