@@ -44,13 +44,13 @@ DUMMY_DATA_ORGANIC_RESULT = {
                         }
         }
 
-DUMMY_DATA_CITE = DUMMY_DATA_ORGANIC_RESULT.copy()
+DUMMY_DATA_CITE = dict()
 DUMMY_DATA_CITE['citations'] = (
-            {'title':'MLA','snippet':None},
+            {'title':'MLA','snippet':'Sherman, Melanie A., Dominique A. Weber, and Peter E. Jensen. "Article." Immunity 3.2 (1995): 197-205.'},
             {'title':'APA','snippet':''},
             {'title':'Chicago','snippet':''},
             {'title':'Harvard','snippet':''},
-            {'title':'Vancouver','snippet':''}
+            {'title':'Vancouver','snippet':'Sherman MA, Weber DA, Jensen PE. Article. Immunity. 1995 Aug 1;3(2):197-205.'}
             )
 DUMMY_DATA_CITE['links'] = (
             {'name':'Bibtex','link':''},
