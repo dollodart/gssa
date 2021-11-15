@@ -72,14 +72,21 @@ class Publication:
         except KeyError:
             pass
 
-        d = dict(
-            title=json['title'],
-            position=json['position'],
-            result_id=json['result_id'],
-            abstract=json['snippet'],
-            publication_summary=json['publication_info']['summary'],
-            link=json['link']
-            )
+        d = dict()
+        for k in 'title', 'position', 'result_id', 'link':
+            try:
+                d[k] = json[k]
+            except KeyError:
+                d[k] = None
+
+        try:
+            d['abstract'] = json['snippet']
+        except KeyError:
+            d['abstract'] = ''
+        try:
+            d['publication_summary'] = json['publication_info']['summary']
+        except KeyError:
+            d['publication_summary'] = ''
         try:
             d['authors_summary'] = [x['name']
                                     for x in json['publication_info']['authors']]
