@@ -132,13 +132,14 @@ class Citation:
     def __init__(self,
                  mla,
                  apa,
-                 chicago,
-                 harvard,
-                 vancouver,
                  bibtex,
                  endnote,
                  refman,
-                 refworks):
+                 refworks,
+                 chicago=None,
+                 harvard=None,
+                 vancouver=None,
+                 iso690=None):
         self.mla = mla
         self.apa = apa
         self.chicago = chicago
@@ -169,9 +170,18 @@ class Citation:
 
     @classmethod
     def from_json(cls, json):
-        d = {d['title'].lower(): d['snippet'] for d in json['citations']}
+        d = dict()
+
+        for adct in json['citations']:
+            d[adct['title'].lower().replace(' ','')] = adct['snippet']
+
         for ldct in json['links']:
             # eventually, follow some of these links
             # but there is no, at the time of writing, SERP API link (direct link would require self-proxying)
             d[ldct['name'].lower()] = ldct['link']
+
+        if 'refwork' in d.keys(): # hack for bad data
+            d['refworks'] = d['refwork']
+            del d['refwork'] 
+
         return cls(**d)
