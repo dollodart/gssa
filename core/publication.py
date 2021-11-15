@@ -7,6 +7,7 @@ from serp.env import CACHE_DIR, URL
 from serp.env import logging
 from serp.env import global_indent, global_checker, global_cache
 from serp.query import flatten_pagination, cache, load_cache
+from .citation import Citation
 import json as jsonlib
 
 def title2file(string):
@@ -24,42 +25,6 @@ def title2file(string):
         string = string.replace(replacee, replacement)
 
     return string
-
-class Citation:
-    def __init__(self,
-                 mla,
-                 apa,
-                 chicago,
-                 harvard,
-                 vancouver,
-                 bibtex,
-                 endnote,
-                 refman,
-                 refworks):
-        self.mla = mla
-        self.apa = apa
-        self.chicago = chicago
-        self.harvard = harvard
-        self.vancouver = vancouver
-        self.bibtex = bibtex
-        self.endnote = endnote
-        self.refman = refman
-        self.refworks = refworks
-
-        # there is some data which can be consistently obtained from these citations
-        # but other data cannot be
-        try:
-            self.authors = self.vancouver.split('.')[0].split(',')
-        except Exception:
-            self.authors = []
-
-    @classmethod
-    def from_json(cls, json):
-        d = {d['title'].lower(): d['snippet'] for d in json['citations']}
-        for ldct in json['links']:
-            # eventually, follow some of these links
-            d[ldct['name'].lower()] = ldct['link']
-        return cls(**d)
 
 class Publication:
     publist = dict()
