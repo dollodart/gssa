@@ -63,4 +63,3 @@ if __name__ == '__main__':
     for metric in hindex, gindex, i10index, oindex, windex:
         l = sorted([(k, metric(d[k])) for k in d], key = lambda x:x[1])
         print(metric, '\n', l[-10:])
-
