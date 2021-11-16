@@ -1,6 +1,3 @@
-from tempmodule import load_data
-publist = load_data()
-
 def ncitations(publist):
     tcites = []
     for pub in publist:
@@ -49,17 +46,3 @@ def value_counts(lst):
         except KeyError:
             d[k] = 1
     return d
-
-if __name__ == '__main__':
-    tcites = citing_authors(publist)
-    d = value_counts(tcites)
-    print(sorted([(x, f'{d[x] / len(tcites):.2f}') for x in d], key=lambda x:x[1]))
-
-    ncites = ncitations(publist)
-    d = groupby(ncites)
-    print(sorted([(x, sum(d[x])) for x in d], key=lambda x:x[1]))
-
-    from metrics import hindex, gindex, i10index, oindex, windex
-    for metric in hindex, gindex, i10index, oindex, windex:
-        l = sorted([(k, metric(d[k])) for k in d], key = lambda x:x[1])
-        print(metric, '\n', l[-10:])
