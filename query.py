@@ -1,18 +1,18 @@
 import requests
 from .env import CACHE_DIR, URL
 from .env import query_dictionary, pagination_dictionary
-from .env import logging
+from .env import core_logger
 from .env import global_checker, global_cache
 from time import time
 import json as jsonlib
 
 def reqget(URL, params): # can be overridden
-    return requests.get(URL, params=params)
+    t0 = time()
+    return time() - t0, requests.get(URL, params=params)
 
 def json_request(parameters):
-    t0 = time()
-    data = reqget(URL, params=parameters)
-    return time() - t0, data.json()
+    dt, data = reqget(URL, params=parameters)
+    return dt, data.json()
 
 def cache(data, filename):
     global_cache.append(filename)
@@ -30,9 +30,9 @@ def flatten_pagination(data, nres=None):
     """Given data with a link to more pages, get all the data and then
     return a flattened data structure."""
 
-    t0 = time()
     org_res = []
     meta = []
+    dtt = 0
     if nres is None:
         nres = 1e10
     nres += len(data['organic_results']) # initial organic results discounted
@@ -44,8 +44,9 @@ def flatten_pagination(data, nres=None):
         try:
             link = data['serpapi_pagination']['next']
             dt, data = reqget(link, params=pagination_dictionary)
-            logging.info(global_indent + 'pulled another page')
+            core_logger.info(global_indent + f'pulled another page in {dt:.1f}s')
             global_checker.increment()
+            dtt += dt
         except KeyError:
             break
-    return time() - t0, org_res, meta
+    return dtt, org_res, meta
