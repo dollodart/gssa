@@ -75,6 +75,7 @@ DUMMY_DATA_CITED_BY = DUMMY_RES(DUMMY_DATA_CITED_BY)
 DUMMY_DATA_SEARCH = DUMMY_RES(DUMMY_DATA_SEARCH)
 DUMMY_DATA_CITE = DUMMY_RES(DUMMY_DATA_CITE)
 
+n = 10
 def dummy_reqget(URL, params): 
     try:
         if params['engine'] == 'google_scholar':
@@ -86,6 +87,8 @@ def dummy_reqget(URL, params):
         elif params['engine'] == 'google_scholar_cite':
                 return 0, DUMMY_DATA_CITE
     except KeyError: # pagination result, or other
-        # required in order to terminate
-        del DUMMY_DATA_SEARCH['serpapi_pagination']['next']
+        # required to terminate
+        DUMMY_DATA_SEARCH['serpapi_pagination']['current'] += 1
+        if DUMMY_DATA_SEARCH['serpapi_pagination']['current'] > 10:
+            del DUMMY_DATA_SEARCH['serpapi_pagination']['next']
         return 0, DUMMY_DATA_SEARCH
