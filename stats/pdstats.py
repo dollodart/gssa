@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 def citer_citee(publist, position=0):
@@ -19,6 +20,24 @@ def citer_citee(publist, position=0):
         'cited pub':etitle, 'cited journal':ejourn, 'citee':ename})
     return df
 
+def pubdf(publist):
+    """
+    Returns a dataframe containing publication data (most of which is derived
+    from the cite data, or Citation object).
+    """
+    nl = []
+    for pub in publist:
+        cbc = pub.cited_by_count
+        c = pub.get_cite()
+
+        nd = {'cited by count':cbc,
+                'authors':c.authors, 'title':c.title, 'journal':c.journal,
+                'date':c.date, 'vol':c.vol, 'issue':c.issue,
+                'pages':c.pages}
+        nl.append(nd)
+    df = pd.DataFrame(nl)
+    return df
+
 if __name__ == '__main__':
     from tempmodule import load_data
     publist = load_data()
@@ -30,3 +49,20 @@ if __name__ == '__main__':
 
     j2j = df.groupby(['citing journal', 'cited journal'])['citee'].agg('count').sort_values()
     print(j2j)
+
+    def plen(x):
+        if type(x) is not tuple:
+            x = x,
+        if len(x) == 2:
+            return x[1] - x[0]
+        return np.nan
+
+    df = pubdf(publist)
+    df['plen'] = df['pages'].map(plen)
+
+    ndf = df.explode('authors')
+    print(ndf.groupby('authors')['cited by count'].agg(['sum', 'mean', 'std']).sort_values(by='sum'))
+    # journal metrics
+    journ_df = ndf.groupby('journal')[['cited by count', 'plen']].agg(['mean', 'std'])
+    print(journ_df.sort_values(by=('cited by count', 'mean')))
+    print(journ_df.sort_values(by=('plen', 'mean')).dropna())
