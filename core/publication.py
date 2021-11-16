@@ -112,10 +112,11 @@ class Publication:
         global_checker.increment()
         # flatten the pagination (makes queries)
         core_logger.info(global_indent + 'querying and flattening paginated results')
-        dt, data = flatten_pagination(data)
+        dt, data, meta = flatten_pagination(data)
         core_logger.info(global_indent + f'took {dt}s for {len(data)} results')
         self._cited_by = [Publication.from_json(result) for result in data]
         cache(data, title2file(self.title) + '-cited-by')
+        cache(meta, title2file(self.title) + '-cited-by-meta')
 
     def set_cited_by(self, cited_by):
         self._cited_by = cited_by

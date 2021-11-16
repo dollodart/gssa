@@ -31,9 +31,11 @@ def flatten_pagination(data):
     return a flattened data structure."""
 
     t0 = time()
-    lst = []
+    org_res = []
+    meta = []
     while True:
-        lst.extend(data['organic_results'])
+        org_res.extend(data.pop('organic_results'))
+        meta.append(data)
         try:
             link = data['serpapi_pagination']['next']
             dt, data = reqget(link, params=pagination_dictionary)
@@ -41,5 +43,4 @@ def flatten_pagination(data):
             global_checker.increment()
         except KeyError:
             break
-    return time() - t0, lst
-
+    return time() - t0, org_res, meta

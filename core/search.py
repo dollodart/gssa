@@ -18,8 +18,9 @@ def search(query_term, overwrite=False):
     core_logger.info(f'found in {dt}s')
     global_checker.increment()
     core_logger.info(f'getting pages and flattening pagination')
-    dt, data = flatten_pagination(data)
+    dt, data, meta = flatten_pagination(data)
     core_logger.info(f'took {dt}s for {len(data)} results')
     global_checker.increment()
     cache(data, query_hash)
+    cache(meta, query_hash + '-meta')
     return [Publication.from_json(d) for d in data]
