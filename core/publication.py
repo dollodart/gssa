@@ -6,7 +6,7 @@ from serp.env import cited_by_dictionary, cite_dictionary, query_dictionary, pag
 from serp.env import CACHE_DIR, URL
 from serp.env import logging
 from serp.env import global_indent, global_checker, global_cache
-from serp.query import flatten_pagination, cache, load_cache
+from serp.query import flatten_pagination, cache, load_cache, json_request
 from serp.ids import title2file
 from .citation import Citation
 import json as jsonlib

@@ -26,16 +26,21 @@ def load_cache(filename):
             return jsonlib.load(_)
     return None
 
-def flatten_pagination(data):
+def flatten_pagination(data, nres=None):
     """Given data with a link to more pages, get all the data and then
     return a flattened data structure."""
 
     t0 = time()
     org_res = []
     meta = []
+    if nres is None:
+        nres = 1e10
+    nres += len(data['organic_results']) # initial organic results discounted
     while True:
         org_res.extend(data.pop('organic_results'))
         meta.append(data)
+        if len(org_res) > nres:
+            break
         try:
             link = data['serpapi_pagination']['next']
             dt, data = reqget(link, params=pagination_dictionary)
