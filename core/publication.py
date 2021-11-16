@@ -7,24 +7,9 @@ from serp.env import CACHE_DIR, URL
 from serp.env import logging
 from serp.env import global_indent, global_checker, global_cache
 from serp.query import flatten_pagination, cache, load_cache
+from serp.ids import title2file
 from .citation import Citation
 import json as jsonlib
-
-def title2file(string):
-    """Makes a filename from a publication title by replacing special
-    characters with escape codes."""
-
-    for replacee, replacement in (('-', '.dash.'),
-                                  (', ', ','),  # commas are allowed
-                                  (' ', '-'),
-                                  ('/', '.fslash.'),
-                                  ('(', '.lparan.'),
-                                  (')', '.rparan.'),
-                                  ('?', '.qmark.'),
-                                  ('*', '.star.')):
-        string = string.replace(replacee, replacement)
-
-    return string
 
 class Publication:
     publist = dict()

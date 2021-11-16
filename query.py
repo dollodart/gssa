@@ -42,3 +42,4 @@ def flatten_pagination(data):
         except KeyError:
             break
     return time() - t0, lst
+

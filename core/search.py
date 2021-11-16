@@ -1,11 +1,8 @@
 from time import time
 from serp.env import query_dictionary, core_logger, global_checker
 from serp.query import json_request, flatten_pagination, cache, load_cache
+from serp.ids import hash_dict
 from .publication import Publication
-
-def hash_dict(dct):
-    slist = sorted(key + dct[key] for key  in dct)
-    return ''.join(slist)
 
 def search(query_term, overwrite=False):
     query_dictionary['q'] = query_term
