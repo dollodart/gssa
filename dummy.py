@@ -67,19 +67,25 @@ while n > 0:
 
 DUMMY_DATA_CITED_BY = DUMMY_DATA_SEARCH.copy() # may be distinct
 
-def dummy_reqget(URL, params): 
-    raise KeyError
-    # only directly called by pagination
+class DUMMY_RES(dict):
+    def json(self):
+        return self
 
-def dummy_json_request(parameters):
+DUMMY_DATA_CITED_BY = DUMMY_RES(DUMMY_DATA_CITED_BY)
+DUMMY_DATA_SEARCH = DUMMY_RES(DUMMY_DATA_SEARCH)
+DUMMY_DATA_CITE = DUMMY_RES(DUMMY_DATA_CITE)
+
+def dummy_reqget(URL, params): 
     try:
-        if parameters['engine'] == 'google_scholar':
+        if params['engine'] == 'google_scholar':
             try:
-                parameters['cites']
+                params['cites']
                 return 0, DUMMY_DATA_CITED_BY # could also be searching within
             except KeyError:
                 return 0, DUMMY_DATA_SEARCH
-        elif parameters['engine'] == 'google_scholar_cite':
+        elif params['engine'] == 'google_scholar_cite':
                 return 0, DUMMY_DATA_CITE
     except KeyError: # pagination result, or other
+        # required in order to terminate
+        del DUMMY_DATA_SEARCH['serpapi_pagination']['next']
         return 0, DUMMY_DATA_SEARCH

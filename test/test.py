@@ -1,9 +1,8 @@
 import serp.env
 
 import serp.query
-from serp.dummy import dummy_reqget, dummy_json_request
+from serp.dummy import dummy_reqget
 serp.query.reqget = dummy_reqget
-serp.query.json_request = dummy_json_request
 
 import serp.core
 from serp.dummy import DUMMY_DATA_ORGANIC_RESULT

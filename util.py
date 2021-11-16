@@ -1,15 +1,17 @@
+from time import time, sleep
 class Checker:
     hourly_limit = 1000
 
-    def __init__(self, cum_search=0, fail_thresh=10):
+    def __init__(self, logger, cum_search=0, fail_thresh=10):
         self.cum_search = cum_search
         self.fail = 0
         self.fail_thresh = fail_thresh
+        self.logger = logger
 
     def increment(self):
         self.cum_search += 1
         if self.cum_search > self.hourly_limit * 0.95:
-            logging.info('##\n'
+            self.logger.info('##\n'
                          f'past hourly limit of {self.hourly_limit}, sleeping until limit refresh')
             sleep(3600)
             self.cum_search = 0

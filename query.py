@@ -1,18 +1,19 @@
 import requests
 from .env import CACHE_DIR, URL
 from .env import query_dictionary, pagination_dictionary
-from .env import logging
-from .env import global_checker, global_cache
+from .env import core_logger
+from .env import global_checker, global_cache, global_indent
 from time import time
 import json as jsonlib
 
 def reqget(URL, params): # can be overridden
-    return requests.get(URL, params=params)
+    t0 = time()
+    data = requests.get(URL, params=params)
+    return time() - t0, data
 
 def json_request(parameters):
-    t0 = time()
-    data = reqget(URL, params=parameters)
-    return time() - t0, data.json()
+    dt, data = reqget(URL, params=parameters)
+    return dt, data.json()
 
 def cache(data, filename):
     global_cache.append(filename)
@@ -37,7 +38,7 @@ def flatten_pagination(data):
         try:
             link = data['serpapi_pagination']['next']
             dt, data = reqget(link, params=pagination_dictionary)
-            logging.info(global_indent + 'pulled another page')
+            core_logger.info(global_indent + 'pulled another page')
             global_checker.increment()
         except KeyError:
             break

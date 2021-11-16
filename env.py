@@ -37,5 +37,5 @@ core_logger = logging.getLogger('core_logger')
 
 # declaration of global instances (all references should come later)
 global_indent = Indent()
-global_checker = Checker()
+global_checker = Checker(core_logger)
 global_cache = [f.name for f in pathlib.Path(f'{CACHE_DIR}').iterdir()]
