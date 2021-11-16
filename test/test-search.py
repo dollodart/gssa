@@ -1,10 +1,9 @@
-import serp.core
 import serp.env
-from serp.dummy import dummy_json_request, dummy_reqget, DUMMY_DATA_ORGANIC_RESULT
-serp.core.json_request = dummy_json_request
-serp.core.reqget = dummy_reqget
+from serp.dummy import dummy_reqget, DUMMY_DATA_ORGANIC_RESULT
+import serp.query
+serp.query.reqget = dummy_reqget
 
-
+import serp.core
 from serp.search import (depth_first_search as dfs,
         breadth_first_search as bfs)
 
