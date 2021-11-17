@@ -6,7 +6,7 @@ from serp.env import cited_by_dictionary, cite_dictionary, query_dictionary, pag
 from serp.env import CACHE_DIR, URL
 from serp.env import logging
 from serp.env import global_indent, global_checker, global_cache
-from serp.query import flatten_pagination, cache, load_cache, json_request
+from serp.query import query, load_cache_paginated, extract_orgres, cache, load_cache, json_request
 from serp.ids import title2file
 from .citation import Citation
 import json as jsonlib
@@ -90,33 +90,22 @@ class Publication:
         cache(json, title2file(inst.title))
         return inst
 
-    def get_cited_by(self, overwrite=False):
+    def get_cited_by(self, nres=None, overwrite=False):
         if overwrite:
             self.query_cited_by()
         elif self.cites_id is None:
             core_logger.info(global_indent + f'no citing articles for {self.title}')
             self._cited_by = []
         elif self._cited_by is None: 
-            cache_res = load_cache(title2file(self.title) + '-cited-by')
-            if cache_res is None:
-                self.query_cited_by()
-            else:
-                self._cited_by = [Publication.from_json(result) for result in cache_res]
+            queries = self.query_cited_by(nres, overwrite) # note this checks the cache
+            self._cited_by = [Publication.from_json(result) for result in extract_orgres(queries)]
+
         return self._cited_by
 
-    def query_cited_by(self):
+    def query_cited_by(self, nres=None, overwrite=False):
         cited_by_dictionary['cites'] = self.cites_id
         core_logger.info(global_indent + f'getting cited by results for {self.title}')
-        dt, data = json_request(cited_by_dictionary)
-        core_logger.info(global_indent + f'took {dt}s')
-        global_checker.increment()
-        # flatten the pagination (makes queries)
-        core_logger.info(global_indent + 'querying and flattening paginated results')
-        dt, data, meta = flatten_pagination(data)
-        core_logger.info(global_indent + f'took {dt}s for {len(data)} results')
-        self._cited_by = [Publication.from_json(result) for result in data]
-        cache(data, title2file(self.title) + '-cited-by')
-        cache(meta, title2file(self.title) + '-cited-by-meta')
+        return query(cited_by_dictionary, nres, overwrite)
 
     def set_cited_by(self, cited_by):
         self._cited_by = cited_by
