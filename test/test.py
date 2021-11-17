@@ -9,6 +9,7 @@ from serp.dummy import DUMMY_DATA_ORGANIC_RESULT
 from serp.dummy import DUMMY_DATA_CITE
 
 serp.core.search('DUMMY_SEARCH')
+serp.core.search('DUMMY_SEARCH', nres=35)
 pub = serp.core.Publication.from_json(DUMMY_DATA_ORGANIC_RESULT)
 pub.get_cite()
 serp.env.global_indent += 2

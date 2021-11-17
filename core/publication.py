@@ -7,24 +7,9 @@ from serp.env import CACHE_DIR, URL
 from serp.env import logging
 from serp.env import global_indent, global_checker, global_cache
 from serp.query import flatten_pagination, cache, load_cache, json_request
+from serp.ids import title2file
 from .citation import Citation
 import json as jsonlib
-
-def title2file(string):
-    """Makes a filename from a publication title by replacing special
-    characters with escape codes."""
-
-    for replacee, replacement in (('-', '.dash.'),
-                                  (', ', ','),  # commas are allowed
-                                  (' ', '-'),
-                                  ('/', '.fslash.'),
-                                  ('(', '.lparan.'),
-                                  (')', '.rparan.'),
-                                  ('?', '.qmark.'),
-                                  ('*', '.star.')):
-        string = string.replace(replacee, replacement)
-
-    return string
 
 class Publication:
     publist = dict()
@@ -127,10 +112,11 @@ class Publication:
         global_checker.increment()
         # flatten the pagination (makes queries)
         core_logger.info(global_indent + 'querying and flattening paginated results')
-        dt, data = flatten_pagination(data)
+        dt, data, meta = flatten_pagination(data)
         core_logger.info(global_indent + f'took {dt}s for {len(data)} results')
         self._cited_by = [Publication.from_json(result) for result in data]
         cache(data, title2file(self.title) + '-cited-by')
+        cache(meta, title2file(self.title) + '-cited-by-meta')
 
     def set_cited_by(self, cited_by):
         self._cited_by = cited_by

@@ -10,22 +10,22 @@ INPUT_DIR = TOP_LEVEL_DIR.joinpath('input')
 
 SERP_API_KEY = 'myapikey'
 URL = 'https://serpapi.com/search'
-max_page_size = 20
-output = 'json'
+NUM_RESULTS_PAGE = 20 # don't change this and keep at maximum value
+OUTPUT_FORMAT = 'json'
 cited_by_dictionary = dict(engine='google_scholar',
                            serp_api_key=SERP_API_KEY,
                            cites=None,
-                           num=max_page_size,
-                           output=output)
+                           num=NUM_RESULTS_PAGE,
+                           output=OUTPUT_FORMAT)
 cite_dictionary = dict(engine='google_scholar_cite',
                        serp_api_key=SERP_API_KEY,
                        q=None,
-                       output=output)
+                       output=OUTPUT_FORMAT)
 query_dictionary = dict(engine='google_scholar',
                        serp_api_key=SERP_API_KEY,
                        q=None,
-                       num=max_page_size,
-                       output=output)
+                       num=NUM_RESULTS_PAGE,
+                       output=OUTPUT_FORMAT)
 pagination_dictionary = dict(serp_api_key=SERP_API_KEY)
 
 
