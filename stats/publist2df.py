@@ -1,4 +1,10 @@
 import pandas as pd
+from datetime import datetime
+
+def mydatetime(obj):
+    if type(obj) is datetime:
+        return obj
+    raise Exception
 
 pr_dtype = {'primary_key':int,
             'title': str,
@@ -6,11 +12,14 @@ pr_dtype = {'primary_key':int,
             'publication_summary': str,
             'cited_by_count': float,
             'journal': str,
-            'date': str, # is datetime when parsed
+            'date': 'datetime64[ns]', # is datetime when parsed
             'vol': float,
             'issue': float,
             'pagelower': float,
             'pageupper': float}
+
+pr_typecaster = pr_dtype.copy()
+pr_typecaster['date'] = mydatetime
 
 def publist2df(publist):
     pub_records = []
@@ -21,11 +30,20 @@ def publist2df(publist):
         fields1 = 'title', 'abstract', 'publication_summary', 'cited_by_count'
         precord = [primary_key]
         for f in fields1:
-            precord.append(getattr(pub, f))
+            try:
+                typecaster = pr_typecaster[f]
+                precord.append(typecaster(getattr(pub, f)))
+            except Exception:
+                precord.append(None)
+
         cite = pub.get_cite()
         fields2 = 'journal', 'date', 'vol', 'issue', 'pagelower', 'pageupper'
         for f in fields2:
-            precord.append(getattr(cite, f))
+            try:
+                typecaster = pr_typecaster[f]
+                precord.append(typecaster(getattr(pub, f)))
+            except Exception:
+                precord.append(None)
 
         pub_records.append(precord) 
 
@@ -37,7 +55,14 @@ def publist2df(publist):
             secondary_key = hash(pub2.title)
             citedby_records.append([primary_key, secondary_key])
 
-    pub_df = pd.DataFrame(pub_records, columns = ('primary_key',) + fields1 + fields2)# dtype=pr_dtype
+    pub_cols = tuple(zip(*pub_records))
+    cols = ('primary_key',) + fields1 + fields2
+    series = dict()
+    for c in range(len(cols)):
+        ser = pd.Series(pub_cols[c], name=cols[c], dtype=pr_dtype[cols[c]])
+        series[cols[c]] = ser
+
+    pub_df = pd.DataFrame(series)
     auth_df = pd.DataFrame(auth_records, columns = ['primary_key', 'author'])
     citedby_df = pd.DataFrame(citedby_records, columns=['primary_key', 'secondary_key'])
     return pub_df, auth_df, citedby_df
@@ -48,7 +73,6 @@ if __name__ == '__main__':
     pubdf, authdf, citedby_df = publist2df(publist)
 
     pubdf['plen'] = pubdf['pageupper'] - pubdf['pagelower']
-    pubdf['plen'] = pubdf['plen'].astype('float64')
     journ_df = pubdf.groupby('journal')[['cited_by_count', 'plen']].agg(['mean', 'std'])
     print(journ_df.sort_values(by=('cited_by_count', 'mean')))
     print(journ_df.sort_values(by=('plen', 'mean')).dropna())
