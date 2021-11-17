@@ -16,7 +16,7 @@ def search(query_term, nres=None, overwrite=False):
         n = len(res)
         if nres is None or n > nres:
             core_logger.info(f'search results for query {query_term} cached, returning')
-            return res
+            return [Publication.from_json(d) for d in res]
         else: # change the page from first 
             meta = load_cache(query_hash + '-meta')
             index = n // (NUM_RESULTS_PAGE + 1)
@@ -41,5 +41,5 @@ def search(query_term, nres=None, overwrite=False):
     if prepend is not None:
         meta = prepend + meta
     cache(meta, query_hash + '-meta')
-
+    
     return [Publication.from_json(d) for d in data]

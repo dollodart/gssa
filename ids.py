@@ -16,4 +16,4 @@ def title2file(string):
 
 def hash_dict(dct):
     slist = sorted(key + str(dct[key]) for key  in dct)
-    return title2file(''.join(slist))
+    return title2file(''.join(slist))[:40]

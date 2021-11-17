@@ -60,10 +60,13 @@ DUMMY_DATA_CITE['links'] = (
             )
 
 n = n0 = 10
+ores = []
 while n > 0:
     DUMMY_DATA_ORGANIC_RESULT['title'] = f'dummy({n0-n})'
-    DUMMY_DATA_SEARCH['organic_results'].append(DUMMY_DATA_ORGANIC_RESULT.copy())
+    ores.append(DUMMY_DATA_ORGANIC_RESULT.copy())
     n -= 1
+
+DUMMY_DATA_SEARCH['organic_results'] = ores.copy()
 
 DUMMY_DATA_CITED_BY = DUMMY_DATA_SEARCH.copy() # may be distinct
 
@@ -71,24 +74,21 @@ class DUMMY_RES(dict):
     def json(self):
         return self
 
-DUMMY_DATA_CITED_BY = DUMMY_RES(DUMMY_DATA_CITED_BY)
-DUMMY_DATA_SEARCH = DUMMY_RES(DUMMY_DATA_SEARCH)
-DUMMY_DATA_CITE = DUMMY_RES(DUMMY_DATA_CITE)
-
 n = 10
 def dummy_reqget(URL, params): 
     try:
         if params['engine'] == 'google_scholar':
             try:
                 params['cites']
-                return 0, DUMMY_DATA_CITED_BY # could also be searching within
+                return 0, DUMMY_RES(DUMMY_DATA_CITED_BY) # could also be searching within
             except KeyError:
-                return 0, DUMMY_DATA_SEARCH
+                return 0, DUMMY_RES(DUMMY_DATA_SEARCH)
         elif params['engine'] == 'google_scholar_cite':
-                return 0, DUMMY_DATA_CITE
+                return 0, DUMMY_RES(DUMMY_DATA_CITE)
     except KeyError: # pagination result, or other
         # required to terminate
+        DUMMY_DATA_SEARCH['organic_results'] = ores.copy() # these are 'popped' by flatten pagination
         DUMMY_DATA_SEARCH['serpapi_pagination']['current'] += 1
         if DUMMY_DATA_SEARCH['serpapi_pagination']['current'] > 10:
             del DUMMY_DATA_SEARCH['serpapi_pagination']['next']
-        return 0, DUMMY_DATA_SEARCH
+        return 0, DUMMY_RES(DUMMY_DATA_SEARCH)
