@@ -22,7 +22,7 @@ cite_dictionary = dict(engine='google_scholar_cite',
                        serp_api_key=SERP_API_KEY,
                        q=None,
                        output=OUTPUT_FORMAT)
-query_dictionary = dict(engine='google_scholar',
+search_dictionary = dict(engine='google_scholar',
                        serp_api_key=SERP_API_KEY,
                        q=None,
                        num=NUM_RESULTS_PAGE,

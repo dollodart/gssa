@@ -1,6 +1,6 @@
 import requests
 from .env import CACHE_DIR, URL, NUM_RESULTS_PAGE
-from .env import query_dictionary, pagination_dictionary
+from .env import search_dictionary, pagination_dictionary
 from .env import core_logger
 from .env import global_checker, global_cache, global_indent
 from .ids import hash_dict

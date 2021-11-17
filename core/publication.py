@@ -2,7 +2,7 @@ import pathlib
 import requests
 from time import time, sleep
 from serp.env import core_logger
-from serp.env import cited_by_dictionary, cite_dictionary, query_dictionary, pagination_dictionary
+from serp.env import cited_by_dictionary, cite_dictionary, search_dictionary, pagination_dictionary
 from serp.env import CACHE_DIR, URL
 from serp.env import logging
 from serp.env import global_indent, global_checker, global_cache
