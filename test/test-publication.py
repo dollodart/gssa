@@ -7,7 +7,9 @@ serp.query.reqget = dummy_reqget
 
 import serp.core
 
-pub0 = serp.core.Publication.from_json(DUMMY_DATA_ORGANIC_RESULT)
+ROOT = DUMMY_DATA_ORGANIC_RESULT.copy()
+ROOT['title'] = 'root'
+pub0 = serp.core.Publication.from_json(ROOT)
 test_logger.info(f'created {pub0.title}')
 citation = pub0.get_cite()
 global_indent += 2
