@@ -13,6 +13,8 @@ SERP_API_KEY = 'myapikey'
 URL = 'https://serpapi.com/search'
 NUM_RESULTS_PAGE = 20 # don't change this and keep at maximum value
 OUTPUT_FORMAT = 'json'
+ORDERED_KEYS = 'q', 'cites', 'engine', 'output', 'num', 'serp_api_key'
+
 cited_by_dictionary = dict(engine='google_scholar',
                            serp_api_key=SERP_API_KEY,
                            cites=None,
