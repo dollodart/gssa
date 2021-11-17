@@ -33,7 +33,7 @@ def pubdf(publist):
         nd = {'cited by count':cbc,
                 'authors':c.authors, 'title':c.title, 'journal':c.journal,
                 'date':c.date, 'vol':c.vol, 'issue':c.issue,
-                'pages':c.pages}
+                'pageupper':c.pageupper, 'pagelower':c.pagelower}
         nl.append(nd)
     df = pd.DataFrame(nl)
     return df
@@ -46,19 +46,14 @@ if __name__ == '__main__':
     self_cite = df[bl].groupby('citer')['citee'].agg('count').sort_values()
     all_cite = df.groupby('citer')['citee'].agg('count').sort_values()
     print(self_cite, all_cite, self_cite / all_cite)
+    print('\nfraction self-citations', self_cite.sum() / all_cite.sum())
 
     j2j = df.groupby(['citing journal', 'cited journal'])['citee'].agg('count').sort_values()
     print(j2j)
 
-    def plen(x):
-        if type(x) is not tuple:
-            x = x,
-        if len(x) == 2:
-            return x[1] - x[0]
-        return np.nan
-
     df = pubdf(publist)
-    df['plen'] = df['pages'].map(plen)
+    df['plen'] = df['pageupper'] - df['pagelower']
+    df['plen'] = df['plen'].astype('float64') # not sure why this is needed, but maybe specify dtypes
 
     ndf = df.explode('authors')
     print(ndf.groupby('authors')['cited by count'].agg(['sum', 'mean', 'std']).sort_values(by='sum'))
