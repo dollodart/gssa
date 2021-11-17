@@ -7,6 +7,7 @@ from serp.util import Indent, Checker
 TOP_LEVEL_DIR = pathlib.Path(__file__).parent
 CACHE_DIR = TOP_LEVEL_DIR.joinpath('output')
 INPUT_DIR = TOP_LEVEL_DIR.joinpath('input')
+MAX_FILENAME_LEN = 40
 
 SERP_API_KEY = 'myapikey'
 URL = 'https://serpapi.com/search'
