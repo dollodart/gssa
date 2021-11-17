@@ -1,14 +1,16 @@
 # Scope
 
-This is a wrapper for the python SerpAPI for GoogleScholar to pull data:
+This is a wrapper for the python SerpAPI for GoogleScholar to obtain publication and citation data through:
 
-1. For general search terms, including author names for those authors without GoogleScholar profiles.
-2. From GoogleScholar author pages for those authors who have GoogleScholar profiles.
+1. Search using terms, including author names for those authors without GoogleScholar profiles.
+2. Search using publication titles from GoogleScholar author pages for those authors who have GoogleScholar profiles.
 
-After getting a set of articles from either a general search or a
-GoogleScholar profile, the nearest neighbors are found, and then
-second nearest neighbors, and potentially more. This recursive graph
-construction is possible because of GoogleScholar's "cited by" links.
+After getting a set of articles from either a term search or a GoogleScholar
+profile, the citing articles are found, and then second citing articles, and
+potentially more. This recursive graph construction is possible because of
+GoogleScholar's "cited by" links. From this graph structure analytics can be
+calculated, by graph algorithms for structural information or by flattening
+into a tabular format to do typical aggregate operations.
 
 ## GoogleScholar Result Structure
 
@@ -128,36 +130,37 @@ Abstract text...
 
 # Program Structure
 
-The SerpAPI is, as named, an API for extracting data from search engines
-like GoogleScholar. However it's existence may be more short-lived
-than GoogleScholar, or its interfaces may change more frequently
-than GoogleScholar. As a result the classes are given constructor
-methods using the SerpAPI json results, and get methods using the
-SerpAPI hosted data, which are separate from other methods. However the
-class properties and methods rely on certain data existing, given the
+SerpAPI is an API for extracting data from search engines like
+GoogleScholar. However it's existence may be more short-lived than
+GoogleScholar, or its interfaces may change more frequently than
+GoogleScholar. As a result the classes are given constructor methods
+using the SerpAPI json results, and get methods using the SerpAPI
+hosted data, which are separate from other methods. However the class
+properties and methods rely on certain data existing, given the
 unchanging interface of GoogleScholar. The SerpAPI results are saved as
 plain text JSON, rather than saving python serialized (through pickle)
 data structures. The SerpAPI HTML parsing is still used, rather than
 parsing the raw HTML.
 
-Nodes of the graph are saved with the depth of their recursion from a
-given search result. When the first set of papers is made by a search
-query, this suggests something about the relative relevance of articles
-to a search term, based on GoogleScholar's algorithms in the first level
-and the citation network for second and deeper levels. Naturally there
-is no way to pull explicitly from GoogleScholar its means of determining
-relevant articles. Of course, in addition to following cited by links,
-the "relevant articles" link can be descended into, though at the time
-of writing (2021-02-09) SerpAPI only provides the link and does not host
-the data at the link.
+The application objects are never serialized, instead being constructed from a
+cache provided the corresponding json query exists. Every request which can be
+made to SerpAPI is able to be cached to minimize the number of redundant
+queries.
+
+There is no way get the data from GoogleScholar on how it determines search
+relevance for a search term. However, in addition to following cited by links,
+the "relevant articles" link can be descended into, though at the time of
+writing (2021-02-09) SerpAPI only provides the link and does not host the data
+at the link.
 
 # Existing packages
 
-For visualization and quantification, there is the NetworkX and other
-packages. In fact particular for bibliometrics there is already the
-Tethne package, which uses the graph algorithms of NetworkX. The purpose
-of this project is only to provide a way of efficiently obtaining the
-data through GoogleScholar.
+For visualization and quantification, there is the NetworkX and other packages.
+In fact particular for bibliometrics there is already the Tethne package, which
+uses the graph algorithms of NetworkX. The purpose of this project is only to
+provide a way of efficiently obtaining the data through GoogleScholar, though
+it provides some functions for calculating statistics using optional
+dependencies of networkx and pandas.
 
 # References
 

@@ -4,7 +4,7 @@ import serp.query
 serp.query.reqget = dummy_reqget
 
 import serp.core
-from serp.search import (depth_first_search as dfs,
+from serp.graph_search import (depth_first_search as dfs,
         breadth_first_search as bfs)
 
 def myfilter(x):
