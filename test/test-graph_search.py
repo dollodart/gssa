@@ -1,4 +1,5 @@
-import serp.env
+from serp.env import global_indent, test_logger
+
 from serp.dummy import dummy_reqget, DUMMY_DATA_ORGANIC_RESULT
 import serp.query
 serp.query.reqget = dummy_reqget
@@ -9,7 +10,7 @@ from serp.graph_search import (depth_first_search as dfs,
 
 def myfilter(x):
     # just used to print, not apply a filter
-    print(serp.env.global_indent + x.title)
+    test_logger.info(global_indent + x.title)
     return True
 
 pub0 = serp.core.Publication.from_json(DUMMY_DATA_ORGANIC_RESULT)
@@ -30,7 +31,7 @@ for c, pub1 in enumerate(pub0.get_cited_by()):
         cited_by.append(DUMMY_DATA_ORGANIC_RESULT.copy())
     pub1.set_cited_by([serp.core.Publication.from_json(x) for x in cited_by])
 
-print('dfs')
+test_logger.info('dfs')
 dfs(pub0, levels=3, filters=(myfilter,))
-print('bfs')
+test_logger.info('bfs')
 bfs(pub0, levels=3, filters=(myfilter,))
