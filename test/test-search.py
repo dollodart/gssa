@@ -6,4 +6,5 @@ import serp.core
 
 serp.core.search('DUMMY_SEARCH')
 serp.core.search('DUMMY_SEARCH', nres=35)
+serp.core.search('DUMMY_SEARCH', overwrite=True)
 print('total number of searches', serp.env.global_checker.cum_search)
