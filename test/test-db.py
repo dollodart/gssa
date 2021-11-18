@@ -1,11 +1,12 @@
 from serp.stats.tempmodule import load_data
 from serp.structio import publist2df
+from serp.env import test_logger
 
 def journal_metrics(publication_df):
     publication_df['plen'] = publication_df['pageupper'] - publication_df['pagelower']
     journ_df = publication_df.groupby('journal')[['cited_by_count', 'plen']].agg(['mean', 'std'])
-    print(journ_df.sort_values(by=('cited_by_count', 'mean')))
-    print(journ_df.sort_values(by=('plen', 'mean')).dropna())
+    test_logger.info(journ_df.sort_values(by=('cited_by_count', 'mean')))
+    test_logger.info(journ_df.sort_values(by=('plen', 'mean')).dropna())
     # this doesn't reproduce pdstats
 
 def citer_citee(publication_df, author_df, cited_by_df):
@@ -29,10 +30,10 @@ def citer_citee(publication_df, author_df, cited_by_df):
     agg = gr.agg('count').sort_values()
     # self-citing (need separate for normalization by publication counts)
     bl = agg.index.get_level_values(0) == agg.index.get_level_values(1)
-    print('who cites who')
-    print(agg)
-    print('\nsummary of self citation')
-    print(agg[bl])
+    test_logger.info('who cites who')
+    test_logger.info(agg)
+    test_logger.info('\nsummary of self citation')
+    test_logger.info(agg[bl])
 
     # normalized self-citation by publication counts
     # citations made by an author, all and to themselves
@@ -41,9 +42,9 @@ def citer_citee(publication_df, author_df, cited_by_df):
     total_self_citations = sdf.groupby('author-citer')['title-citee'].agg('nunique')
     frac_self = total_self_citations / total_citations
     frac_self = frac_self.dropna().sort_values()
-    print('\nself-citation fraction of citations')
-    print(frac_self)
-    print('\ntotal fraction of citations which are self-citing: ' + 
+    test_logger.info('\nself-citation fraction of citations')
+    test_logger.info(frac_self)
+    test_logger.info('\ntotal fraction of citations which are self-citing: ' + 
          f'{100*total_self_citations.sum()/total_citations.sum():.1f}%')
     # this doesn't reproduce test-stats, or pdstats, if the data contains publications without authors
 

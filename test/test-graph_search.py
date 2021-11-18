@@ -9,7 +9,7 @@ from serp.graph_search import (depth_first_search as dfs,
         breadth_first_search as bfs)
 
 def myfilter(x):
-    # just used to print, not apply a filter
+    # just used to test_logger.info, not apply a filter
     test_logger.info(global_indent + x.title)
     return True
 

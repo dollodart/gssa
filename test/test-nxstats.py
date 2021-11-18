@@ -2,6 +2,7 @@ import numpy as np
 import networkx.algorithms as nxa
 from serp.stats.tempmodule import load_data 
 from serp.structio import publist2digraph
+from serp.env import test_logger
 
 def characterize(G):
     recip = nxa.reciprocity(G)
@@ -41,15 +42,15 @@ if __name__ == '__main__':
     st1 = characterize(G)
     G.remove_nodes_from([x[0] for x in G.out_degree if x[1] < 1])
     st2 = characterize(G)
-    print(st1, st2)
+    test_logger.info(f'{st1} {st2}')
 
     ind, outd, rat = degree_deciles(G)
-    print('in-degree deciles', '-'.join(f'{x:.1f}' for x in ind))
-    print('out-degree deciles', '-'.join(f'{x:.1f}' for x in outd))
-    print('out-degree/in-degree deciles', '-'.join(f'{x:.1E}' for x in rat))
+    test_logger.info('in-degree deciles ' + '-'.join(f'{x:.1f}' for x in ind))
+    test_logger.info('out-degree deciles ' + '-'.join(f'{x:.1f}' for x in outd))
+    test_logger.info('out-degree/in-degree deciles ' + '-'.join(f'{x:.1E}' for x in rat))
 
     top3s = centralities_top3(G)
     for k in top3s:
-        print(str(k))
+        test_logger.info(str(k))
         for pub, value in top3s[k]:
-            print(pub.title, 'has centrality', round(value, 2))
+            test_logger.info(f'{pub.title} has centrality {value:.2f}')
