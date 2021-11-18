@@ -60,13 +60,13 @@ DUMMY_DATA_CITE['links'] = (
             )
 
 n = n0 = 10
-ores = []
+orgres = []
 while n > 0:
     DUMMY_DATA_ORGANIC_RESULT['title'] = f'dummy({n0-n})'
-    ores.append(DUMMY_DATA_ORGANIC_RESULT.copy())
+    orgres.append(DUMMY_DATA_ORGANIC_RESULT.copy())
     n -= 1
 
-DUMMY_DATA_SEARCH['organic_results'] = ores.copy()
+DUMMY_DATA_SEARCH['organic_results'] = orgres.copy()
 
 DUMMY_DATA_CITED_BY = DUMMY_DATA_SEARCH.copy() # may be distinct
 
@@ -87,7 +87,11 @@ def dummy_reqget(URL, params):
                 return 0, DUMMY_RES(DUMMY_DATA_CITE)
     except KeyError: # pagination result, or other
         # required to terminate
-        DUMMY_DATA_SEARCH['organic_results'] = ores.copy() # these are 'popped' by flatten pagination
+        orgresc = orgres.copy() # these are 'popped' by flatten pagination
+        DUMMY_DATA_SEARCH['organic_results'] = orgresc 
+        current = DUMMY_DATA_SEARCH['serpapi_pagination']['current']
+        for c, orgr in enumerate(orgresc):
+            orgr['title'] = f'dummy({n0*(current + 1) - c})'
         DUMMY_DATA_SEARCH['serpapi_pagination']['current'] += 1
         if DUMMY_DATA_SEARCH['serpapi_pagination']['current'] > 10:
             del DUMMY_DATA_SEARCH['serpapi_pagination']['next']

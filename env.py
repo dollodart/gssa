@@ -37,6 +37,7 @@ with open(TOP_LEVEL_DIR.joinpath('logger.yaml'), 'r') as _:
     lconfig.dictConfig(dct)
 
 core_logger = logging.getLogger('core_logger')
+test_logger = logging.getLogger('test_logger')
 
 # declaration of global instances (all references should come later)
 global_indent = Indent()
