@@ -1,5 +1,5 @@
 import requests
-from .env import CACHE_DIR, URL, NUM_RESULTS_PAGE
+from .env import CACHE_DIR, CITED_BY_DIR, SEARCH_DIR, URL, NUM_RESULTS_PAGE
 from .env import search_dictionary, pagination_dictionary
 from .env import core_logger
 from .env import global_checker, global_cache, global_indent
@@ -16,40 +16,40 @@ def json_request(parameters):
     dt, data = reqget(URL, params=parameters)
     return dt, data.json()
 
-def cache(data, filename, datatype=None):
-    if datatype is not None:
-        filepath = f'{CACHE_DIR}/{datatype}/{filename}'
+def cache(data, filename, directory=None):
+    if directory is not None:
+        filepath = directory.joinpath(filename)
     else:
-        filepath = f'{CACHE_DIR}/{filename}'
+        filepath = CACHE_DIR.joinpath(filename)
     global_cache.append(filepath)
     with open(filepath, 'w') as _:
         _.write(jsonlib.dumps(data))
     return None
 
-def load_cache(filename, datatype=None):
-    if datatype is not None:
-        filepath = f'{CACHE_DIR}/{datatype}/{filename}'
+def load_cache(filename, directory=None):
+    if directory is not None:
+        filepath = directory.joinpath(filename)
     else:
-        filepath = f'{CACHE_DIR}/{filename}'
+        filepath = CACHE_DIR.joinpath(filename)
     if filepath in global_cache:
         with open(filepath, 'r') as _:
             return jsonlib.load(_)
     return None
 
-def load_cache_paginated(fileprefix, datatype=None):
+def load_cache_paginated(fileprefix, directory=None):
     counter = 1
-    data = load_cache(f'{fileprefix}-{counter}', datatype)
+    data = load_cache(f'{fileprefix}-{counter}', directory)
     queries = []
     #while data := load_cache(f'{fileprefix}-{counter}') is not None: # strange error of only bool results for data
     while data is not None:
         queries.append(data)
         counter += 1
-        data = load_cache(f'{fileprefix}-{counter}', datatype)
+        data = load_cache(f'{fileprefix}-{counter}', directory)
     if queries == []:
         return None
     return queries
 
-def pagination_query(queryresult, fileprefix, datatype=None, nres=None):
+def pagination_query(queryresult, fileprefix, directory=None, nres=None):
     """
     Assumes correct queryresult is input (run load_cache_paginated beforehand).
     Specify number of desired results, not number of pages (multiply number of
@@ -69,7 +69,7 @@ def pagination_query(queryresult, fileprefix, datatype=None, nres=None):
             n += len(queryresult['organic_results'])
 
             page = queryresult['serpapi_pagination']['current']
-            cache(queryresult, f'{fileprefix}-{page}', datatype)
+            cache(queryresult, f'{fileprefix}-{page}', directory)
             queries.append(queryresult)
         except KeyError:
             break
@@ -85,10 +85,10 @@ def query(qdict, nres=None, overwrite=False):
 
     if 'q' in qdict.keys():
         search_key = 'q'
-        datatype= 'search'
+        directory = SEARCH_DIR
     else:
         search_key = 'cites'
-        datatype = 'cited_by'
+        directory = CITED_BY_DIR
 
     search_term = qdict[search_key]
 
@@ -96,7 +96,7 @@ def query(qdict, nres=None, overwrite=False):
         raise Exception(f'cannot query {nres} < {NUM_RESULTS_PAGE} for {search_term}')
 
     query_hash = hash_dict(qdict)
-    queries = load_cache_paginated(query_hash)
+    queries = load_cache_paginated(query_hash, directory)
 
     if queries is not None and not overwrite:
         orgres = extract_orgres(queries)
@@ -115,10 +115,10 @@ def query(qdict, nres=None, overwrite=False):
         dt, squery = json_request(qdict)
         core_logger.info(f'found in {dt}s')
         global_checker.increment()
-        cache(squery, f'{query_hash}-1', datatype) # important, otherwise load_cache_pagination will return None
+        cache(squery, f'{query_hash}-1', directory) # important, otherwise load_cache_pagination will return None
 
     core_logger.info(f'getting pages and flattening pagination')
-    dt, queries2 = pagination_query(squery, query_hash, datatype, nres)
+    dt, queries2 = pagination_query(squery, query_hash, directory, nres)
     core_logger.info(f'took {dt}s for {len(queries2)} pages')
     global_checker.increment()
 

@@ -7,6 +7,16 @@ from serp.util import Indent, Checker
 TOP_LEVEL_DIR = pathlib.Path(__file__).parent
 CACHE_DIR = TOP_LEVEL_DIR.joinpath('output')
 INPUT_DIR = TOP_LEVEL_DIR.joinpath('input')
+CITED_BY_SDIR = 'cited_by'
+CITE_SDIR = 'cite'
+PUBLICATION_SDIR = 'publication'
+SEARCH_SDIR = 'search'
+
+CITED_BY_DIR = CACHE_DIR.joinpath(CITED_BY_SDIR)
+CITE_DIR = CACHE_DIR.joinpath(CITE_SDIR)
+PUBLICATION_DIR = CACHE_DIR.joinpath(PUBLICATION_SDIR)
+SEARCH_DIR = CACHE_DIR.joinpath(SEARCH_SDIR)
+
 MAX_FILENAME_LEN = 40
 
 SERP_API_KEY = 'myapikey'
@@ -42,4 +52,6 @@ test_logger = logging.getLogger('test_logger')
 # declaration of global instances (all references should come later)
 global_indent = Indent()
 global_checker = Checker(core_logger)
-global_cache = [f.name for f in pathlib.Path(f'{CACHE_DIR}').iterdir()]
+global_cache = []
+for dr in CITED_BY_DIR, CITE_DIR, PUBLICATION_DIR, SEARCH_DIR:
+    global_cache.extend([f for f in dr.iterdir()])
