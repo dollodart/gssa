@@ -160,13 +160,17 @@ class Citation:
             self.date = struct_data[3]
             self.vol = struct_data[4]
             self.issue = struct_data[5]
+            self.pagelower = struct_data[6]
+            self.pageupper = struct_data[7]
             
-            if struct_data[7] is None:
-                self.pages = struct_data[6]
-            else:
-                self.pages = struct_data[6], struct_data[7]
         except Exception:
-            self.authors = self.title = self.journal = self.date = self.vol = self.issue = self.pages = None
+            self.authors = self.title = self.journal = self.date = self.vol = self.issue = self.pagelower = self.pageupper = None
+
+    def get_pages(self):
+        if self.pageupper is None:
+            return self.pagelower
+        else:
+            return self.pageupper
 
     @classmethod
     def from_json(cls, json):
