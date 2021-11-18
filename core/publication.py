@@ -3,8 +3,7 @@ import requests
 from time import time, sleep
 from serp.env import core_logger
 from serp.env import cited_by_dictionary, cite_dictionary, search_dictionary, pagination_dictionary
-from serp.env import CACHE_DIR, URL
-from serp.env import logging
+from serp.env import CACHE_DIR
 from serp.env import global_indent, global_checker, global_cache
 from serp.query import query, load_cache_paginated, extract_orgres, cache, load_cache, json_request
 from serp.ids import title2file
@@ -87,7 +86,7 @@ class Publication:
             d['cites_id'] = None
 
         inst = cls(**d)
-        cache(json, title2file(inst.title))
+        cache(json, title2file(inst.title), 'publication')
         return inst
 
     def get_cited_by(self, nres=None, overwrite=False):
@@ -114,7 +113,7 @@ class Publication:
         if overwrite:
             self.query_cite()
         elif self._cite is None:
-            cache_res = load_cache(title2file(self.title) + '-cite')
+            cache_res = load_cache(title2file(self.title), 'cite')
             if cache_res is None:
                 self.query_cite()
             else:
@@ -128,7 +127,7 @@ class Publication:
         core_logger.info(global_indent + f'took {dt}s')
         global_checker.increment()
         self._cite = Citation.from_json(data)
-        cache(data, title2file(self.title) + '-cite')
+        cache(data, title2file(self.title), 'cite')
 
     def set_cite(self, cite):
         self._cite = cite
