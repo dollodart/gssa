@@ -1,9 +1,9 @@
 from serp.stats.tempmodule import load_data
-import serp.stats.pdstats as pstats
+from serp.structio import extract_publication_df, extract_citer_citee_df
 
 publist = load_data()
 
-df = pstats.make_publication_df(publist)
+df = extract_publication_df(publist)
 df['plen'] = df['pageupper'] - df['pagelower']
 df['plen'] = df['plen'].astype('float64') # not sure why this is needed, but maybe specify dtypes
 
@@ -17,7 +17,7 @@ print('journal publication metrics')
 print(journ_df.sort_values(by=('cited by count', 'mean')))
 print(journ_df.sort_values(by=('plen', 'mean')).dropna())
 
-df = pstats.make_citer_citee_df(publist, position=-1)
+df = extract_citer_citee_df(publist, position=-1)
 bl = df['citer'] == df['citee']
 self_cite = df[bl].groupby('citer')['citee'].agg('count').sort_values()
 all_cite = df.groupby('citer')['citee'].agg('count').sort_values()

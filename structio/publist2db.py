@@ -66,3 +66,9 @@ def publist2df(publist):
     auth_df = pd.DataFrame(auth_records, columns = ['primary_key', 'author'])
     citedby_df = pd.DataFrame(citedby_records, columns=['primary_key', 'secondary_key'])
     return pub_df, auth_df, citedby_df
+
+def publist2db(publist, sqlconnection):
+    # TO DO
+    # use pandas.DataFrame.tosql method, with append option, to update tables in a relational database
+    # requires sqlalchemy
+    pass

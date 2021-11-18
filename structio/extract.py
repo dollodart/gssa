@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-def make_citer_citee_df(publist, position=0):
+def extract_citer_citee_df(publist, position=0):
     l = []
     for pub in publist:
         pubcite = pub.get_cite()
@@ -20,7 +20,7 @@ def make_citer_citee_df(publist, position=0):
         'cited pub':etitle, 'cited journal':ejourn, 'citee':ename})
     return df
 
-def make_publication_df(publist):
+def extract_publication_df(publist):
     """
     Returns a dataframe containing publication data (most of which is derived
     from the cite data, or Citation object).

@@ -1,5 +1,5 @@
 from serp.stats.tempmodule import load_data
-from serp.stats.publist2df import publist2df
+from serp.structio import publist2df
 
 def journal_metrics(publication_df):
     publication_df['plen'] = publication_df['pageupper'] - publication_df['pagelower']
