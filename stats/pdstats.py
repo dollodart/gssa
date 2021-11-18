@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-def citer_citee(publist, position=0):
+def make_citer_citee_df(publist, position=0):
     l = []
     for pub in publist:
         pubcite = pub.get_cite()
@@ -20,7 +20,7 @@ def citer_citee(publist, position=0):
         'cited pub':etitle, 'cited journal':ejourn, 'citee':ename})
     return df
 
-def pubdf(publist):
+def make_publication_df(publist):
     """
     Returns a dataframe containing publication data (most of which is derived
     from the cite data, or Citation object).
@@ -37,27 +37,3 @@ def pubdf(publist):
         nl.append(nd)
     df = pd.DataFrame(nl)
     return df
-
-if __name__ == '__main__':
-    from tempmodule import load_data
-    publist = load_data()
-    df = citer_citee(publist, position=-1)
-    bl = df['citer'] == df['citee']
-    self_cite = df[bl].groupby('citer')['citee'].agg('count').sort_values()
-    all_cite = df.groupby('citer')['citee'].agg('count').sort_values()
-    print(self_cite, all_cite, self_cite / all_cite)
-    print('\nfraction self-citations', self_cite.sum() / all_cite.sum())
-
-    j2j = df.groupby(['citing journal', 'cited journal'])['citee'].agg('count').sort_values()
-    print(j2j)
-
-    df = pubdf(publist)
-    df['plen'] = df['pageupper'] - df['pagelower']
-    df['plen'] = df['plen'].astype('float64') # not sure why this is needed, but maybe specify dtypes
-
-    ndf = df.explode('authors')
-    print(ndf.groupby('authors')['cited by count'].agg(['sum', 'mean', 'std']).sort_values(by='sum'))
-    # journal metrics
-    journ_df = ndf.groupby('journal')[['cited by count', 'plen']].agg(['mean', 'std'])
-    print(journ_df.sort_values(by=('cited by count', 'mean')))
-    print(journ_df.sort_values(by=('plen', 'mean')).dropna())
