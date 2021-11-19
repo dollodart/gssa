@@ -1,3 +1,4 @@
+from copy import copy, deepcopy
 DUMMY_DATA_SEARCH = {
         'search_metadata': {
             'id': 'he24da18a',
@@ -63,36 +64,65 @@ n = n0 = 10
 orgres = []
 while n > 0:
     DUMMY_DATA_ORGANIC_RESULT['title'] = f'dummy({n0-n})'
-    orgres.append(DUMMY_DATA_ORGANIC_RESULT.copy())
+    orgres.append(deepcopy(DUMMY_DATA_ORGANIC_RESULT))
     n -= 1
 
-DUMMY_DATA_SEARCH['organic_results'] = orgres.copy()
+DUMMY_DATA_SEARCH['organic_results'] = orgres
+DUMMY_DATA_CITED_BY = deepcopy(DUMMY_DATA_SEARCH) # may be distinct
+DUMMY_DATA_SEARCH_TERMINAL = deepcopy(DUMMY_DATA_SEARCH)
+del DUMMY_DATA_SEARCH_TERMINAL['serpapi_pagination']['next']
 
-DUMMY_DATA_CITED_BY = DUMMY_DATA_SEARCH.copy() # may be distinct
-
-class DUMMY_RES(dict):
+class DummyResult(dict):
     def json(self):
         return self
 
-n = 10
+class DummyServer:
+    def __init__(self):
+        self.dummy_counter = 0
+        self.pagination = 0
+
+    def route(self, URL, params):
+        try:
+            if params['engine'] == 'google_scholar':
+                try:
+                    params['cites']
+                    return self.get_cited_by()
+                except KeyError:
+                    return self.get_search()
+            elif params['engine'] == 'google_scholar_cite':
+                    return self.get_cite()
+        except Exception:
+            return self.get_other()
+
+    def get(self, dummy_data):
+        self.dummy_counter += 1
+        return DummyResult(dummy_data)
+
+    def get_cited_by(self):
+        for c, orgr in enumerate(DUMMY_DATA_CITED_BY['organic_results']):
+            orgr['title'] = f'{self.dummy_counter}/{c}'
+        return 0, self.get(DUMMY_DATA_CITED_BY)
+    def get_search(self):
+        for c, orgr in enumerate(DUMMY_DATA_SEARCH['organic_results']):
+            orgr['title'] = f'{self.dummy_counter}/{c}'
+        return 0, self.get(DUMMY_DATA_SEARCH)
+    def get_cite(self):
+        return 0, self.get(DUMMY_DATA_CITE)
+    def get_other(self):
+        self.pagination += 1
+        if self.pagination > 10:
+            dds = DUMMY_DATA_SEARCH_TERMINAL
+            dds['serpapi_pagination']['current'] = 10
+            self.pagination = 0
+        else:
+            dds = DUMMY_DATA_SEARCH
+            dds['serpapi_pagination']['current'] = self.pagination
+
+        for c, orgr in enumerate(dds['organic_results']):
+            orgr['title'] = f'{self.dummy_counter}/{c}'
+        return 0, self.get(dds)
+
+dummy_server = DummyServer()
 def dummy_reqget(URL, params): 
-    try:
-        if params['engine'] == 'google_scholar':
-            try:
-                params['cites']
-                return 0, DUMMY_RES(DUMMY_DATA_CITED_BY) # could also be searching within
-            except KeyError:
-                return 0, DUMMY_RES(DUMMY_DATA_SEARCH)
-        elif params['engine'] == 'google_scholar_cite':
-                return 0, DUMMY_RES(DUMMY_DATA_CITE)
-    except KeyError: # pagination result, or other
-        # required to terminate
-        orgresc = orgres.copy() # these are 'popped' by flatten pagination
-        DUMMY_DATA_SEARCH['organic_results'] = orgresc 
-        current = DUMMY_DATA_SEARCH['serpapi_pagination']['current']
-        for c, orgr in enumerate(orgresc):
-            orgr['title'] = f'dummy({n0*(current + 1) - c})'
-        DUMMY_DATA_SEARCH['serpapi_pagination']['current'] += 1
-        if DUMMY_DATA_SEARCH['serpapi_pagination']['current'] > 10:
-            del DUMMY_DATA_SEARCH['serpapi_pagination']['next']
-        return 0, DUMMY_RES(DUMMY_DATA_SEARCH)
+    global dummy_server
+    return dummy_server.route(URL, params)
