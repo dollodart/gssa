@@ -1,8 +1,9 @@
 from .publication import Publication
 from .citation import Citation
 from .search import search
-from serp.env import global_cache, PUBLICATION_DIR
-
+from serp.env import global_cache, PUBLICATION_DIR, CITE_DIR
+from serp.cache import load_cache
+from serp.ids import title2file
 import json as jsonlib
 
 def load_cached_publications(filters=tuple()):
@@ -13,8 +14,12 @@ def load_cached_publications(filters=tuple()):
     pubs = []
     for f in global_cache:
         if f.parent == PUBLICATION_DIR:
-            with open(f, 'r') as _:
-                pub = Publication.from_json(jsonlib.load(_))
+            try:
+                with open(f, 'r') as _:
+                    pub = Publication.from_json(jsonlib.load(_))
+            except Exception as e:
+                print('should delete', f, 'corrupted data')
+                continue
         else:
             continue
         pss = True

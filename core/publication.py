@@ -5,7 +5,8 @@ from serp.env import core_logger
 from serp.env import cited_by_dictionary, cite_dictionary, search_dictionary, pagination_dictionary
 from serp.env import CACHE_DIR, CITE_DIR, PUBLICATION_DIR
 from serp.env import global_indent, global_checker, global_cache
-from serp.query import query, load_cache_paginated, extract_orgres, cache, load_cache, json_request
+from serp.query import json_request, query, extract_orgres
+from serp.cache import cache, load_cache
 from serp.ids import title2file
 from .citation import Citation
 import json as jsonlib

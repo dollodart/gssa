@@ -2,8 +2,9 @@ import requests
 from .env import CACHE_DIR, CITED_BY_DIR, SEARCH_DIR, URL, NUM_RESULTS_PAGE
 from .env import search_dictionary, pagination_dictionary
 from .env import core_logger
-from .env import global_checker, global_cache, global_indent
+from .env import global_checker, global_indent
 from .ids import hash_dict
+from .cache import load_cache_paginated
 from time import time
 import json as jsonlib
 
@@ -15,39 +16,6 @@ def reqget(URL, params): # can be overridden
 def json_request(parameters):
     dt, data = reqget(URL, params=parameters)
     return dt, data.json()
-
-def cache(data, filename, directory=None):
-    if directory is not None:
-        filepath = directory.joinpath(filename)
-    else:
-        filepath = CACHE_DIR.joinpath(filename)
-    global_cache.append(filepath)
-    with open(filepath, 'w') as _:
-        _.write(jsonlib.dumps(data))
-    return None
-
-def load_cache(filename, directory=None):
-    if directory is not None:
-        filepath = directory.joinpath(filename)
-    else:
-        filepath = CACHE_DIR.joinpath(filename)
-    if filepath in global_cache:
-        with open(filepath, 'r') as _:
-            return jsonlib.load(_)
-    return None
-
-def load_cache_paginated(fileprefix, directory=None):
-    counter = 1
-    data = load_cache(f'{fileprefix}-{counter}', directory)
-    queries = []
-    #while data := load_cache(f'{fileprefix}-{counter}') is not None: # strange error of only bool results for data
-    while data is not None:
-        queries.append(data)
-        counter += 1
-        data = load_cache(f'{fileprefix}-{counter}', directory)
-    if queries == []:
-        return None
-    return queries
 
 def pagination_query(queryresult, fileprefix, directory=None, nres=None):
     """
