@@ -63,6 +63,7 @@ def pagination_query(queryresult, fileprefix, directory=None, nres=None):
         try:
             link = queryresult['serpapi_pagination']['next']
             dt, queryresult = reqget(link, params=pagination_dictionary)
+            queryresult = queryresult.json()
             core_logger.info(global_indent + f'pulled another page in {dt}s')
             global_checker.increment()
             dtt += dt
