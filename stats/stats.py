@@ -13,8 +13,8 @@ def citee_ncitations(publist):
     tcites = []
     for pub in publist:
         cbc = pub.cited_by_count
-        if cbc != len(pub.get_cited_by()):
-            pass # can do something in case disagreement
+        #if cbc != len(pub.get_cited_by()):
+        #    pass # can do something in case disagreement
         fa = pub.get_cite().authors
         if fa is None or len(fa) == 0:
             continue

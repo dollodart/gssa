@@ -1,10 +1,27 @@
 from .publication import Publication
 from .citation import Citation
 from .search import search
-from serp.env import global_cache, PUBLICATION_DIR, CITE_DIR
-from serp.cache import load_cache
-from serp.ids import title2file
+from serp.env import global_cache, PUBLICATION_DIR, CITE_DIR, CITED_BY_DIR
+from serp.env import cited_by_dictionary 
+from serp.cache import load_cache, load_cache_paginated
+from serp.query import extract_orgres
+from serp.ids import title2file, hash_dict
 import json as jsonlib
+
+# filters
+def has_cached_cite(pub):
+    filepath = CITE_DIR.joinpath(title2file(pub.title))
+    if filepath.exists():
+        return True
+    return False
+
+def has_cached_cited_by(pub):
+    # note need to add suffix -1 since queries are necessarily paginated
+    cited_by_dictionary['cites'] = pub.cites_id
+    filepath = CITED_BY_DIR.joinpath(hash_dict(cited_by_dictionary) + '-1')
+    if filepath.exists():
+        return True
+    return False
 
 def load_cached_publications(filters=tuple()):
     """
