@@ -15,6 +15,7 @@ citation = pub0.get_cite()
 global_indent += 2
 publist = pub0.get_cited_by()
 for pub in publist:
+    pub.get_cite()
     test_logger.info(global_indent + f'found {pub.title} as citing article of {pub0.title}')
 
 assert len(publist) == len(set(publist))

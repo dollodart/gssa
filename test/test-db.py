@@ -1,4 +1,3 @@
-from serp.stats.tempmodule import load_data
 from serp.structio import publist2df
 from serp.env import test_logger
 
@@ -49,7 +48,9 @@ def citer_citee(publication_df, author_df, cited_by_df):
     # this doesn't reproduce test-stats, or pdstats, if the data contains publications without authors
 
 if __name__ == '__main__':
-    publist = load_data()
+    from serp.core import load_cached_publications_hq
+    publist = load_cached_publications_hq()
+
     publication_df, author_df, cited_by_df = publist2df(publist)
     journal_metrics(publication_df)
     citer_citee(publication_df, author_df, cited_by_df)

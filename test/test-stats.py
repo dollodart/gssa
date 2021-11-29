@@ -1,5 +1,4 @@
 from serp.stats.metrics import hindex, gindex, i10index, oindex, windex
-from serp.stats.tempmodule import load_data
 from serp.stats import citer_citee_pairs, citee_ncitations
 from serp.env import test_logger
 
@@ -34,6 +33,7 @@ def test_citee_ncitations(publist):
             test_logger.info(f'{k}:{v:.2f}')
 
 if __name__ == '__main__':
-    publist = load_data()
+    from serp.core import load_cached_publications_hq
+    publist = load_cached_publications_hq()
     test_citer_citee_pairs(publist)
     test_citee_ncitations(publist)

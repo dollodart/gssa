@@ -1,6 +1,5 @@
 import numpy as np
 import networkx.algorithms as nxa
-from serp.stats.tempmodule import load_data 
 from serp.structio import publist2digraph
 from serp.env import test_logger
 
@@ -36,7 +35,9 @@ def degree_deciles(G):
     return np.quantile(ind, q), np.quantile(outd, q), np.quantile(rat, q)
 
 if __name__ == '__main__':
-    publist = load_data()
+    from serp.core import load_cached_publications_hq
+    publist = load_cached_publications_hq()
+
     G = publist2digraph(publist)
 
     st1 = characterize(G)
