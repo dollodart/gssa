@@ -1,3 +1,6 @@
+import serp.userenv
+serp.userenv.CACHE_DIR = serp.userenv.DUMMY_CACHE_DIR
+
 from serp.env import global_indent, test_logger
 
 from serp.dummy import dummy_reqget, DUMMY_DATA_ORGANIC_RESULT

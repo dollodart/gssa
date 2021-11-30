@@ -4,13 +4,9 @@ import logging.config as lconfig
 import pathlib
 from serp.util import Indent, Checker
 
-TOP_LEVEL_DIR = pathlib.Path(__file__).parent
-CACHE_DIR = TOP_LEVEL_DIR.joinpath('output')
-INPUT_DIR = TOP_LEVEL_DIR.joinpath('input')
-CITED_BY_SDIR = 'cited_by'
-CITE_SDIR = 'cite'
-PUBLICATION_SDIR = 'publication'
-SEARCH_SDIR = 'search'
+from serp.userenv import (TOP_LEVEL_DIR, CACHE_DIR, INPUT_DIR,
+                         CITED_BY_SDIR, CITE_SDIR, PUBLICATION_SDIR,
+                         SEARCH_SDIR)
 
 CITED_BY_DIR = CACHE_DIR.joinpath(CITED_BY_SDIR)
 CITE_DIR = CACHE_DIR.joinpath(CITE_SDIR)
@@ -19,7 +15,6 @@ SEARCH_DIR = CACHE_DIR.joinpath(SEARCH_SDIR)
 
 MAX_FILENAME_LEN = 40
 
-#SERP_API_KEY = 'myapikey'
 from .secretenv import SERP_API_KEY
 
 URL = 'https://serpapi.com/search'

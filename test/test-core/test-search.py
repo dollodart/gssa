@@ -1,3 +1,6 @@
+import serp.userenv
+serp.userenv.CACHE_DIR = serp.userenv.DUMMY_CACHE_DIR
+
 from serp.env import test_logger
 import serp.query
 from serp.dummy import dummy_reqget
