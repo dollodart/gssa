@@ -35,10 +35,13 @@ def breadth_first_search(publist, levels=1, filters=tuple(), black=[]):
 
     next_breadth = []
     for pub in publist:
+        cont = False
         for f in filters:
             if not f(pub):
-                continue
-        if pub in black:
+                serp.env.core_logger.info(f'{pub.title} does not satisfy filter {f}, skipping')
+                cont = True
+                break
+        if cont or pub in black:
             continue
         else:
             black.append(pub)

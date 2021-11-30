@@ -20,7 +20,7 @@ SEARCH_DIR = CACHE_DIR.joinpath(SEARCH_SDIR)
 MAX_FILENAME_LEN = 40
 
 #SERP_API_KEY = 'myapikey'
-from .mykey import SERP_API_KEY
+from .secretenv import SERP_API_KEY
 
 URL = 'https://serpapi.com/search'
 NUM_RESULTS_PAGE = 20 # don't change this and keep at maximum value
