@@ -1,6 +1,6 @@
 from time import time, sleep
 class Checker:
-    hourly_limit = 1000
+    hourly_limit = 100000
 
     def __init__(self, logger, cum_search=0, fail_thresh=10):
         self.cum_search = cum_search
@@ -68,5 +68,5 @@ class Indent:
         return self
     def __str__(self):
         if self.indent > 0:
-            return ' '*self.indent
-        return ''
+            return f' (l={self.indent}) '
+        return ' (l=0) '

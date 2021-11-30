@@ -1,7 +1,7 @@
 version: 1
 formatters:
   simple:
-    format: '%(message)s - %(levelname)s'
+    format: '%(levelname)s - %(asctime)s - %(message)s'
   sourcefind:
     format: '%(filename)s - %(lineno)s - %(message)s'
 handlers:
