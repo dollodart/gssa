@@ -34,19 +34,13 @@ def test_citee_ncitations(publist):
 
 if __name__ == '__main__':
     from serp.core import (load_cached_publications, has_cached_cite,
-                           has_cached_cited_by)
+                           load_cached_publications_all_data)
 
     filters = has_cached_cite,
     publist = load_cached_publications(filters)
     test_logger.info(f'{len(publist)} publications with cite are being analyzed by citee_ncitations')
     test_citee_ncitations(publist)
 
-    filters = has_cached_cite, has_cached_cited_by
-    publist = load_cached_publications(filters)
+    publist = load_cached_publications_all_data()
     test_logger.info(f'{len(publist)} publications with cited_by are being analyzed by citer_citee_pairs')
-    test_logger.info(f'dropping all cited_by publications without cite')
-    for pub in publist:
-        cited_by = pub.get_cited_by()
-        ncited_by = [p for p in cited_by if has_cached_cite(p)]
-        pub.set_cited_by(ncited_by)
     test_citer_citee_pairs(publist)

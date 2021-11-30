@@ -1,8 +1,8 @@
 from serp.structio import extract_publication_df, extract_citer_citee_df
 from serp.env import test_logger
-from serp.core import load_cached_publications_hq
+from serp.core import load_cached_publications_all_data
 
-publist = load_cached_publications_hq()
+publist = load_cached_publications_all_data()
 
 df = extract_publication_df(publist)
 df['plen'] = df['pageupper'] - df['pagelower']

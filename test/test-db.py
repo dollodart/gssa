@@ -48,8 +48,8 @@ def citer_citee(publication_df, author_df, cited_by_df):
     # this doesn't reproduce test-stats, or pdstats, if the data contains publications without authors
 
 if __name__ == '__main__':
-    from serp.core import load_cached_publications_hq
-    publist = load_cached_publications_hq()
+    from serp.core import load_cached_publications_all_data
+    publist = load_cached_publications_all_data()
 
     publication_df, author_df, cited_by_df = publist2df(publist)
     journal_metrics(publication_df)

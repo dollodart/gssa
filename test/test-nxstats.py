@@ -18,11 +18,14 @@ def centralities_top3(G):
             nxa.centrality.eigenvector_centrality,
             nxa.centrality.closeness_centrality,
             nxa.centrality.betweenness_centrality):
-        d = alg(G)
-        skeys = sorted(d, key=lambda x:d[x])
-        top3s[alg] = []
-        for key in skeys[-3:][::-1]:
-            top3s[alg].append((key, d[key]))
+        try:
+            d = alg(G)
+            skeys = sorted(d, key=lambda x:d[x])
+            top3s[alg] = []
+            for key in skeys[-3:][::-1]:
+                top3s[alg].append((key, d[key]))
+        except Exception: #can be convergence exception
+            test_logger.warning(f'data failed to converge for {alg}')
     return top3s
 
 def degree_deciles(G):
@@ -35,8 +38,8 @@ def degree_deciles(G):
     return np.quantile(ind, q), np.quantile(outd, q), np.quantile(rat, q)
 
 if __name__ == '__main__':
-    from serp.core import load_cached_publications_hq
-    publist = load_cached_publications_hq()
+    from serp.core import load_cached_publications_all_data
+    publist = load_cached_publications_all_data()
 
     G = publist2digraph(publist)
 

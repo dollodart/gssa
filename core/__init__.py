@@ -47,17 +47,16 @@ def load_cached_publications(filters=tuple()):
             pubs.append(pub)
     return pubs
 
-def load_cached_publications_hq(filters=tuple()):
+def load_cached_publications_all_data():
+    """
+    To be used for testing purposes (to avoid making queries when calling get_* commands).
+    Note this changes a mutable property of a publication, which will cause the
+    publication to appear to have less citations than it actually does.
+    """
+    filters = has_cached_cite, has_cached_cited_by
     publist = load_cached_publications(filters)
-    npublist = []
     for pub in publist:
-        try:
-            cite = pub.get_cite()
-            assert cite.authors is not None
-            pub.get_cited_by()
-            for p in cited_by:
-                cite = p.get_cite() # some may be none
-            npublist.append(pub)
-        except Exception as e:
-            continue
-    return npublist
+        cited_by = pub.get_cited_by()
+        ncited_by = [p for p in cited_by if has_cached_cite(p)]
+        pub.set_cited_by(ncited_by)
+    return publist
