@@ -43,12 +43,12 @@ author_gprofile = 'aeinstein.html'
 
 # Package Description
 
-This package is designed around Data Access Objects for the Google Scholar
-database through SerpAPI. It has to go through the public-facing Google Scholar
-search and so is limited in the queries, that is, it can only do word searches
-using the search bar (advanced search would be possible, but isn't supported
-here). All filtering, aggregating, and other applications are done with the DAO
-or some other data structures the DAO are converted to (see later). The DAO is
+This package is designed around a Data Access Object for the Google Scholar
+database queried through SerpAPI. Queries go through the public-facing Google
+Scholar search and so are limited to word or term searches using the search bar
+(advanced search would be possible, but isn't supported here). All filtering,
+aggregating, and other transformations are done with the DAO or some other data
+structures the DAO are converted to (see Package Structure section). The DAO is
 the Publication class instance and its component class Citation and corresponds
 to an 'organic result' found through:
 
@@ -102,6 +102,7 @@ this module is limited.
 
 # Dependencies
 
+- BeautifulSoup4: HTML parsing
 - numpy: general vectorized array routines
 - pandas: for calcuating statistics and making a relational database schema from application objects
 - networkx: for graph algorithms running on citation networks
@@ -113,12 +114,12 @@ There are significant improvements to be made. I still choose to publish at
 this stage, though, because there is no alternative (to my knowledge). I was
 surprised to find no use of SerpAPI for Google Scholar beyond that from the
 developers of SerpAPI (see https://github.com/topics/serp-api where a limited
-number of projects are listed not by the developers). Though changes will be
-made that remove backwards compatibility for a prematurely published project,
-that only applies to scripts made with the package. It doesn't remove any
-compatibility with the SerpAPI results which are saved as received. And what I
-found lacking when I first used SerpAPI was a way to explore citation networks
-without wasting queries, which this accomplishes at version 1.
+number of projects are listed not by the developers of SerpAPI). Though changes
+will be made that remove backwards compatibility for a prematurely published
+project, that only applies to scripts made with the package. It doesn't remove
+any compatibility with the SerpAPI results which are saved as received. And
+what I found lacking when I first used SerpAPI was a way to explore citation
+networks without wasting queries, which this accomplishes at version 1.
 
 Given 1 cent per query, and 20 page results for a search, it costs 1.05 cents
 to query a given publication (because each publication also requires a cite
@@ -144,8 +145,9 @@ google link and made into a query for SerpAPI, but it poses some barrier.
 
 ## TODOs
 
-- Fix dropped and partial queries: nominally the logic using `overwrite` and
-  `nres` in the `query` subroutine does this but it is untested.
+- Fix handling of dropped and partial queries: nominally the logic using
+  `overwrite` and `nres` in the `query` subroutine does this but it is
+  untested.
 - Fix dummy data creation and caching duplication.
 - Fix publication object duplication generally (even outside of dummy data).
 - Add edge case handling for 0 or 1 returned results. Currently handled ad hoc using
