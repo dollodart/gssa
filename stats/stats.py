@@ -9,7 +9,7 @@ def groupby(lst_doubles):
             d[k] = [v]
     return d
 
-def citee_ncitations(publist):
+def citee_ncitations(publist, author_index=0):
     tcites = []
     for pub in publist:
         cbc = pub.cited_by_count
@@ -18,7 +18,7 @@ def citee_ncitations(publist):
         fa = pub.get_cite().authors
         if fa is None or len(fa) == 0:
             continue
-        tcites.append((fa[0], cbc))
+        tcites.append((fa[author_index], cbc))
     return groupby(tcites)
 
 def value_counts(lst):
@@ -30,7 +30,7 @@ def value_counts(lst):
             d[k] = 1
     return d
 
-def citer_citee_pairs(publist, author_index=0):
+def citer_citee_pairs(publist, author_index=-1):
     # list of citer-citee for use in series
     tcites = []
     for pub in publist:
@@ -44,5 +44,5 @@ def citer_citee_pairs(publist, author_index=0):
                 continue
             flist.append(fa2)
 
-        tcites.extend([fa[-1] + '-' + x[-1] for x in flist])
+        tcites.extend([fa[author_index] + '-' + x[author_index] for x in flist])
     return value_counts(tcites)
