@@ -188,4 +188,7 @@ class Citation:
             d['refworks'] = d['refwork']
             del d['refwork'] 
 
+        if 'nbr6023' in d.keys():
+            del d['nbr6023'] # bad key
+
         return cls(**d)

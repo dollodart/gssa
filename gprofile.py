@@ -38,16 +38,18 @@ def schol_list(tbody):
 
 import serp.core
 from .env import global_indent, core_logger
-def gprofile_search(slist):
-    tpublist = []
-    for title, _, journal in slist:
+def gprofile_search(taj):
+    publist = []
+    for title, authors, journal in taj:
+        core_logger.info(f'querying {title}--{",".join(authors)}--{journal}')
         query = title + ' ' + journal
-        publist = serp.core.search(query)
-        pub = publist[0]
+        pubs = serp.core.search(query, nres=20)
+        pub = pubs[0]
         # gprofile article title may not match the search result one
         # one can use edit distance to quantify the match and choose the best one
-        if len(publist) > 1:
+        if len(pubs) > 1:
             core_logger.warn(global_indent + f'more than one result found for "{query}"')
             core_logger.warn(global_indent + f'returning first result "{pub.title}"')
-        tpublist.append(pub) 
-    return pub
+        # note the search result is still cached, and serp.core.search returns publications which are also cached
+        publist.append(pub) 
+    return publist

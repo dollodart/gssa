@@ -3,6 +3,7 @@ from .citation import Citation
 from .search import search
 from serp.env import global_cache, PUBLICATION_DIR, CITE_DIR, CITED_BY_DIR
 from serp.env import cited_by_dictionary 
+from serp.env import core_logger
 from serp.cache import load_cache, load_cache_paginated
 from serp.query import extract_orgres
 from serp.ids import title2file, hash_dict
@@ -35,7 +36,7 @@ def load_cached_publications(filters=tuple()):
                 with open(f, 'r') as _:
                     pub = Publication.from_json(jsonlib.load(_))
             except Exception as e:
-                print('should delete', f, 'corrupted data')
+                core_logger.error(f'delete {f}, corrupted data')
                 continue
         else:
             continue
@@ -56,7 +57,11 @@ def load_cached_publications_all_data():
     filters = has_cached_cite, has_cached_cited_by
     publist = load_cached_publications(filters)
     for pub in publist:
-        cited_by = pub.get_cited_by()
+        try:
+            cited_by = pub.get_cited_by()
+        except Exception as e:
+            core_logger.error(f'delete cited_by for {pub.title}, corrupted data')
+            cited_by = []
         ncited_by = [p for p in cited_by if has_cached_cite(p)]
         pub.set_cited_by(ncited_by)
     return publist
