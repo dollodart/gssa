@@ -195,6 +195,7 @@ names).
 
 ## GoogleScholar result HTML (simplified)
 
+```
 <div>
 <h3>
   <span>
@@ -239,9 +240,11 @@ Abstract text...
   </a>
 </div>
 </div>
+```
 
 ## Cite page HTML (simplified)
 
+```
 <div>
 <table>
 <tbody>
@@ -283,4 +286,4 @@ Abstract text...
   RefWorks
   </a>
 </div>
-
+```
