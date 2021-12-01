@@ -1,10 +1,12 @@
 import matplotlib.pyplot as plt
 import networkx as nx
-from serp.structio import publist2digraph
+from gssa.structio import publist2digraph
+
 
 def visualize(G):
     nx.draw(G)
     plt.show()
+
 
 def plot_degree_dists(G):
 
@@ -29,14 +31,15 @@ def plot_degree_dists(G):
     y = [x for x in rat if x > 0]
     plt.semilogy(range(len(y)), sorted(y))
     plt.xlabel(f'number (note {len(rat) - len(y)} were 0 '
-            +  f'and {len(ind) - len(rat)} were inf')
+               + f'and {len(ind) - len(rat)} were inf')
     plt.ylabel('ratio out-degree / in-degree')
     plt.show()
 
+
 if __name__ == '__main__':
-    from serp.core import load_cached_publications_all_data
+    from gssa.core import load_cached_publications_all_data
     publist = load_cached_publications_all_data()
     G = publist2digraph(publist)
 
-    #visualize(G)
+    # visualize(G)
     plot_degree_dists(G)

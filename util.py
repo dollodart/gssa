@@ -1,4 +1,6 @@
 from time import time, sleep
+
+
 class Checker:
     hourly_limit = 100000
 
@@ -12,7 +14,7 @@ class Checker:
         self.cum_search += 1
         if self.cum_search > self.hourly_limit * 0.95:
             self.logger.info('##\n'
-                         f'past hourly limit of {self.hourly_limit}, sleeping until limit refresh')
+                             f'past hourly limit of {self.hourly_limit}, sleeping until limit refresh')
             sleep(3600)
             self.cum_search = 0
 
@@ -41,7 +43,8 @@ class Checker:
 class Indent:
     def __init__(self):
         self.indent = 0
-    def __add__(self, other): 
+
+    def __add__(self, other):
         # should also be used for __radd__ in case of `3 + indent` or similar
         if type(other) is int:
             self.indent += other
@@ -51,6 +54,7 @@ class Indent:
             return self
         elif type(other) is str:
             return str(self) + other
+
     def __radd__(self, other):
         if type(other) is int:
             self.indent += other
@@ -60,12 +64,14 @@ class Indent:
             return self
         elif type(other) is str:
             return other + str(self)
+
     def __sub__(self, other):
         if type(other) is int:
             self.indent -= other
         elif type(other) is Indent:
             self.indent += other.indent
         return self
+
     def __str__(self):
         if self.indent > 0:
             return f' (l={self.indent}) '

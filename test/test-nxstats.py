@@ -1,32 +1,35 @@
 import numpy as np
 import networkx.algorithms as nxa
-from serp.structio import publist2digraph
-from serp.env import test_logger
+from gssa.structio import publist2digraph
+from gssa.env import test_logger
+
 
 def characterize(G):
     recip = nxa.reciprocity(G)
     windex = nxa.wiener_index(G)
-    # fh = nxa.flow_hierarchy(G) # flow_hierarchy = 1 - reciprocity? 
+    # fh = nxa.flow_hierarchy(G) # flow_hierarchy = 1 - reciprocity?
     acluster = nxa.average_clustering(G)
-    return (f'reciprocity = {recip:.2f}, Wiener index = {windex:.2f}\n' + 
+    return (f'reciprocity = {recip:.2f}, Wiener index = {windex:.2f}\n' +
             f'average clustering = {acluster:.2f}')
+
 
 def centralities_top3(G):
 
-    top3s = dict() 
+    top3s = dict()
     for alg in (nxa.centrality.degree_centrality,
-            nxa.centrality.eigenvector_centrality,
-            nxa.centrality.closeness_centrality,
-            nxa.centrality.betweenness_centrality):
+                nxa.centrality.eigenvector_centrality,
+                nxa.centrality.closeness_centrality,
+                nxa.centrality.betweenness_centrality):
         try:
             d = alg(G)
-            skeys = sorted(d, key=lambda x:d[x])
+            skeys = sorted(d, key=lambda x: d[x])
             top3s[alg] = []
             for key in skeys[-3:][::-1]:
                 top3s[alg].append((key, d[key]))
-        except Exception: #can be convergence exception
+        except Exception:  # can be convergence exception
             test_logger.warning(f'data failed to converge for {alg}')
     return top3s
+
 
 def degree_deciles(G):
 
@@ -37,8 +40,9 @@ def degree_deciles(G):
     q = np.linspace(0, 1, 11)
     return np.quantile(ind, q), np.quantile(outd, q), np.quantile(rat, q)
 
+
 if __name__ == '__main__':
-    from serp.core import load_cached_publications_all_data
+    from gssa.core import load_cached_publications_all_data
     publist = load_cached_publications_all_data()
 
     G = publist2digraph(publist)
@@ -50,8 +54,10 @@ if __name__ == '__main__':
 
     ind, outd, rat = degree_deciles(G)
     test_logger.info('in-degree deciles ' + '-'.join(f'{x:.1f}' for x in ind))
-    test_logger.info('out-degree deciles ' + '-'.join(f'{x:.1f}' for x in outd))
-    test_logger.info('out-degree/in-degree deciles ' + '-'.join(f'{x:.1E}' for x in rat))
+    test_logger.info('out-degree deciles ' +
+                     '-'.join(f'{x:.1f}' for x in outd))
+    test_logger.info('out-degree/in-degree deciles ' +
+                     '-'.join(f'{x:.1E}' for x in rat))
 
     top3s = centralities_top3(G)
     for k in top3s:

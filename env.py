@@ -1,12 +1,13 @@
+from .secretenv import SERP_API_KEY
 import yaml
 import logging
 import logging.config as lconfig
 import pathlib
-from serp.util import Indent, Checker
+from gssa.util import Indent, Checker
 
-from serp.userenv import (TOP_LEVEL_DIR, CACHE_DIR, INPUT_DIR,
-                         CITED_BY_SDIR, CITE_SDIR, PUBLICATION_SDIR,
-                         SEARCH_SDIR)
+from gssa.userenv import (TOP_LEVEL_DIR, CACHE_DIR, INPUT_DIR,
+                          CITED_BY_SDIR, CITE_SDIR, PUBLICATION_SDIR,
+                          SEARCH_SDIR)
 
 CITED_BY_DIR = CACHE_DIR.joinpath(CITED_BY_SDIR)
 CITE_DIR = CACHE_DIR.joinpath(CITE_SDIR)
@@ -15,10 +16,9 @@ SEARCH_DIR = CACHE_DIR.joinpath(SEARCH_SDIR)
 
 MAX_FILENAME_LEN = 40
 
-from .secretenv import SERP_API_KEY
 
 URL = 'https://serpapi.com/search'
-NUM_RESULTS_PAGE = 20 # don't change this and keep at maximum value
+NUM_RESULTS_PAGE = 20  # don't change this and keep at maximum value
 OUTPUT_FORMAT = 'json'
 ORDERED_KEYS = 'q', 'cites', 'engine', 'output', 'num', 'serp_api_key'
 
@@ -32,10 +32,10 @@ cite_dictionary = dict(engine='google_scholar_cite',
                        q=None,
                        output=OUTPUT_FORMAT)
 search_dictionary = dict(engine='google_scholar',
-                       serp_api_key=SERP_API_KEY,
-                       q=None,
-                       num=NUM_RESULTS_PAGE,
-                       output=OUTPUT_FORMAT)
+                         serp_api_key=SERP_API_KEY,
+                         q=None,
+                         num=NUM_RESULTS_PAGE,
+                         output=OUTPUT_FORMAT)
 pagination_dictionary = dict(serp_api_key=SERP_API_KEY)
 
 

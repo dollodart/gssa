@@ -8,14 +8,17 @@ from .cache import load_cache_paginated, cache
 from time import time
 import json as jsonlib
 
-def reqget(URL, params): # can be overridden
+
+def reqget(URL, params):  # can be overridden
     t0 = time()
     data = requests.get(URL, params=params)
     return time() - t0, data
 
+
 def json_request(parameters):
     dt, data = reqget(URL, params=parameters)
     return dt, data.json()
+
 
 def pagination_query(queryresult, fileprefix, directory=None, nres=None):
     """
@@ -44,11 +47,13 @@ def pagination_query(queryresult, fileprefix, directory=None, nres=None):
             break
     return dtt, queries
 
+
 def extract_orgres(queries):
     orgres = []
     for q in queries:
         orgres.extend(q['organic_results'])
     return orgres
+
 
 def query(qdict, nres=None, overwrite=False):
 
@@ -62,7 +67,8 @@ def query(qdict, nres=None, overwrite=False):
     search_term = qdict[search_key]
 
     if nres is not None and nres < NUM_RESULTS_PAGE:
-        raise Exception(f'cannot query {nres} < {NUM_RESULTS_PAGE} for {search_term}')
+        raise Exception(
+            f'cannot query {nres} < {NUM_RESULTS_PAGE} for {search_term}')
 
     query_hash = hash_dict(qdict)
     queries = load_cache_paginated(query_hash, directory)
@@ -70,30 +76,32 @@ def query(qdict, nres=None, overwrite=False):
     if queries is not None and not overwrite:
         orgres = extract_orgres(queries)
         n = len(orgres)
-        
+
         if (nres is None) or (n > nres):
             core_logger.info(f'search results (type {search_key}) ' +
-                             f'for search term {search_term} ' + 
+                             f'for search term {search_term} ' +
                              f'up to {n} results cached, returning')
             return queries
         else:
             squery = orgres[-1]
-            nres -= n # only get the additional results
+            nres -= n  # only get the additional results
     else:
-        core_logger.info(f'finding first page in search (type {search_key}) for term:{search_term}')
+        core_logger.info(
+            f'finding first page in search (type {search_key}) for term:{search_term}')
         dt, squery = json_request(qdict)
         core_logger.info(f'found in {dt}s')
         global_checker.increment()
-        cache(squery, f'{query_hash}-1', directory) # important, otherwise load_cache_pagination will return None
+        # important, otherwise load_cache_pagination will return None
+        cache(squery, f'{query_hash}-1', directory)
 
     core_logger.info(f'getting pages and flattening pagination')
     dt, queries2 = pagination_query(squery, query_hash, directory, nres)
     core_logger.info(f'took {dt}s for {len(queries2)} pages')
     global_checker.increment()
 
-    queries2.insert(0, squery) # add original page
+    queries2.insert(0, squery)  # add original page
     if queries is not None:
         queries2 = queries[:-1] + queries2
         # queries[:-1] == squery when queries is not None
-    
+
     return queries2

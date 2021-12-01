@@ -1,18 +1,20 @@
 import pathlib
 import requests
 from time import time, sleep
-from serp.env import core_logger
-from serp.env import cited_by_dictionary, cite_dictionary, search_dictionary, pagination_dictionary
-from serp.env import CACHE_DIR, CITE_DIR, PUBLICATION_DIR
-from serp.env import global_indent, global_checker, global_cache
-from serp.query import json_request, query, extract_orgres
-from serp.cache import cache, load_cache
-from serp.ids import title2file
+from gssa.env import core_logger
+from gssa.env import cited_by_dictionary, cite_dictionary, search_dictionary, pagination_dictionary
+from gssa.env import CACHE_DIR, CITE_DIR, PUBLICATION_DIR
+from gssa.env import global_indent, global_checker, global_cache
+from gssa.query import json_request, query, extract_orgres
+from gssa.cache import cache, load_cache
+from gssa.ids import title2file
 from .citation import Citation
 import json as jsonlib
 
+
 class Publication:
     publist = dict()
+
     def __init__(self,
                  title,
                  position,
@@ -39,7 +41,7 @@ class Publication:
         try:
             self.__class__.publist[self.title]
             core_logger.warn('initialized publication when there already exists'
-            ' a publication with the same title in application memory')
+                             ' a publication with the same title in application memory')
         except KeyError:
             self.__class__.publist[self.title] = self
 
@@ -51,8 +53,8 @@ class Publication:
 
         try:
             r = cls.publist[json['title']]
-            core_logger.info(global_indent + f'Publication object with title {json["title"]}\n' + 
-                         global_indent + 'already in memory, returning') 
+            core_logger.info(global_indent + f'Publication object with title {json["title"]}\n' +
+                             global_indent + 'already in memory, returning')
             return r
         except KeyError:
             pass
@@ -94,17 +96,21 @@ class Publication:
         if overwrite:
             self.query_cited_by()
         elif self.cites_id is None:
-            core_logger.info(global_indent + f'no citing articles for {self.title}')
+            core_logger.info(
+                global_indent + f'no citing articles for {self.title}')
             self._cited_by = []
-        elif self._cited_by is None: 
-            queries = self.query_cited_by(nres, overwrite) # note this checks the cache
-            self._cited_by = [Publication.from_json(result) for result in extract_orgres(queries)]
+        elif self._cited_by is None:
+            # note this checks the cache
+            queries = self.query_cited_by(nres, overwrite)
+            self._cited_by = [Publication.from_json(
+                result) for result in extract_orgres(queries)]
 
         return self._cited_by
 
     def query_cited_by(self, nres=None, overwrite=False):
         cited_by_dictionary['cites'] = self.cites_id
-        core_logger.info(global_indent + f'getting cited by results for {self.title}')
+        core_logger.info(
+            global_indent + f'getting cited by results for {self.title}')
         return query(cited_by_dictionary, nres, overwrite)
 
     def set_cited_by(self, cited_by):

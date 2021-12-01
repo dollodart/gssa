@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+
 def extract_citer_citee_df(publist, position=0):
     l = []
     for pub in publist:
@@ -13,12 +14,14 @@ def extract_citer_citee_df(publist, position=0):
             fa2 = pub2cite.authors
             if fa2 is None or len(fa2) == 0:
                 continue
-            l.append((pub.title, pubcite.journal, fa[position], pub2.title, pub2cite.journal, fa2[position]))
+            l.append((pub.title, pubcite.journal,
+                      fa[position], pub2.title, pub2cite.journal, fa2[position]))
 
     rtitle, rjourn, rname, etitle, ejourn, ename = zip(*l)
-    df = pd.DataFrame({'citing pub':rtitle, 'citing journal':rjourn, 'citer':rname,
-        'cited pub':etitle, 'cited journal':ejourn, 'citee':ename})
+    df = pd.DataFrame({'citing pub': rtitle, 'citing journal': rjourn, 'citer': rname,
+                       'cited pub': etitle, 'cited journal': ejourn, 'citee': ename})
     return df
+
 
 def extract_publication_df(publist):
     """
@@ -30,10 +33,10 @@ def extract_publication_df(publist):
         cbc = pub.cited_by_count
         c = pub.get_cite()
 
-        nd = {'cited by count':cbc,
-                'authors':c.authors, 'title':c.title, 'journal':c.journal,
-                'date':c.date, 'vol':c.vol, 'issue':c.issue,
-                'pageupper':c.pageupper, 'pagelower':c.pagelower}
+        nd = {'cited by count': cbc,
+              'authors': c.authors, 'title': c.title, 'journal': c.journal,
+              'date': c.date, 'vol': c.vol, 'issue': c.issue,
+              'pageupper': c.pageupper, 'pagelower': c.pagelower}
         nl.append(nd)
     df = pd.DataFrame(nl)
     return df

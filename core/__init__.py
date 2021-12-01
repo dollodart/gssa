@@ -1,20 +1,23 @@
 from .publication import Publication
 from .citation import Citation
 from .search import search
-from serp.env import global_cache, PUBLICATION_DIR, CITE_DIR, CITED_BY_DIR
-from serp.env import cited_by_dictionary 
-from serp.env import core_logger
-from serp.cache import load_cache, load_cache_paginated
-from serp.query import extract_orgres
-from serp.ids import title2file, hash_dict
+from gssa.env import global_cache, PUBLICATION_DIR, CITE_DIR, CITED_BY_DIR
+from gssa.env import cited_by_dictionary
+from gssa.env import core_logger
+from gssa.cache import load_cache, load_cache_paginated
+from gssa.query import extract_orgres
+from gssa.ids import title2file, hash_dict
 import json as jsonlib
 
 # filters
+
+
 def has_cached_cite(pub):
     filepath = CITE_DIR.joinpath(title2file(pub.title))
     if filepath.exists():
         return True
     return False
+
 
 def has_cached_cited_by(pub):
     # note need to add suffix -1 since queries are necessarily paginated
@@ -23,6 +26,7 @@ def has_cached_cited_by(pub):
     if filepath.exists():
         return True
     return False
+
 
 def load_cached_publications(filters=tuple()):
     """
@@ -48,6 +52,7 @@ def load_cached_publications(filters=tuple()):
             pubs.append(pub)
     return pubs
 
+
 def load_cached_publications_all_data():
     """
     To be used for testing purposes (to avoid making queries when calling get_* commands).
@@ -60,7 +65,8 @@ def load_cached_publications_all_data():
         try:
             cited_by = pub.get_cited_by()
         except Exception as e:
-            core_logger.error(f'delete cited_by for {pub.title}, corrupted data')
+            core_logger.error(
+                f'delete cited_by for {pub.title}, corrupted data')
             cited_by = []
         ncited_by = [p for p in cited_by if has_cached_cite(p)]
         pub.set_cited_by(ncited_by)

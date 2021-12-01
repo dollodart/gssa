@@ -1,5 +1,6 @@
 import networkx as nx
 
+
 def publist2digraph(publist):
     G = nx.DiGraph()
     G.add_nodes_from(publist)

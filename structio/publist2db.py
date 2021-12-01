@@ -1,18 +1,20 @@
 import pandas as pd
 from datetime import datetime
 
+
 def mydatetime(obj):
     if type(obj) is datetime:
         return obj
     raise Exception
 
-pr_dtype = {'primary_key':int,
+
+pr_dtype = {'primary_key': int,
             'title': str,
             'abstract': str,
             'publication_summary': str,
             'cited_by_count': float,
             'journal': str,
-            'date': 'datetime64[ns]', # is datetime when parsed
+            'date': 'datetime64[ns]',  # is datetime when parsed
             'vol': float,
             'issue': float,
             'pagelower': float,
@@ -20,6 +22,7 @@ pr_dtype = {'primary_key':int,
 
 pr_typecaster = pr_dtype.copy()
 pr_typecaster['date'] = mydatetime
+
 
 def publist2df(publist):
     pub_records = []
@@ -45,7 +48,7 @@ def publist2df(publist):
             except Exception:
                 precord.append(None)
 
-        pub_records.append(precord) 
+        pub_records.append(precord)
 
         if cite.authors is not None:
             for auth in cite.authors:
@@ -63,9 +66,11 @@ def publist2df(publist):
         series[cols[c]] = ser
 
     pub_df = pd.DataFrame(series)
-    auth_df = pd.DataFrame(auth_records, columns = ['primary_key', 'author'])
-    citedby_df = pd.DataFrame(citedby_records, columns=['primary_key', 'secondary_key'])
+    auth_df = pd.DataFrame(auth_records, columns=['primary_key', 'author'])
+    citedby_df = pd.DataFrame(citedby_records, columns=[
+                              'primary_key', 'secondary_key'])
     return pub_df, auth_df, citedby_df
+
 
 def publist2db(publist, sqlconnection):
     # TO DO

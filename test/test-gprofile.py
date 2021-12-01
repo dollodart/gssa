@@ -1,13 +1,13 @@
-import serp.userenv
-serp.userenv.CACHE_DIR = serp.userenv.DUMMY_CACHE_DIR
+from gssa.gprofile import schol_list, gprofile_search
+import gssa.query
+from gssa.dummy import dummy_reqget
+from gssa.env import INPUT_DIR, test_logger
+import gssa.userenv
+gssa.userenv.CACHE_DIR = gssa.userenv.DUMMY_CACHE_DIR
 
-from serp.env import INPUT_DIR, test_logger
-from serp.dummy import dummy_reqget
 
-import serp.query
-serp.query.reqget = dummy_reqget
+gssa.query.reqget = dummy_reqget
 
-from serp.gprofile import schol_list, gprofile_search 
 
 with open(f'{INPUT_DIR}/aeinstein.html', 'r') as _:
     taj = schol_list(_)

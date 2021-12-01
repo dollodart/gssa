@@ -1,6 +1,6 @@
-from serp.env import INPUT_DIR, core_logger
-from serp.secretenv import author_gprofile
-from serp.gprofile import schol_list, gprofile_search 
+from gssa.env import INPUT_DIR, core_logger
+from gssa.secretenv import author_gprofile
+from gssa.gprofile import schol_list, gprofile_search
 
 with open(INPUT_DIR.joinpath(author_gprofile), 'r') as _:
     taj = schol_list(_)
@@ -12,7 +12,7 @@ publist = gprofile_search(taj)
 for pub in publist:
     pub.get_cite()
     try:
-        publist2 = pub.get_cited_by(nres=50) # only get the first 50 results
+        publist2 = pub.get_cited_by(nres=50)  # only get the first 50 results
         print(len(publist2))
         for pub2 in publist2:
             try:

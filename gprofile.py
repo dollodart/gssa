@@ -1,4 +1,7 @@
+import gssa.core
+from .env import global_indent, core_logger
 from bs4 import BeautifulSoup
+
 
 def schol_list(tbody):
     """
@@ -27,29 +30,30 @@ def schol_list(tbody):
             journal = el.div.text
         if el is not None:
             el.decompose()
-        
+
         title = title.strip('\n')
         authors = tuple(x.strip() for x in authors.split(','))
         journal = journal.strip('\n')
 
         l.append((title, authors, journal))
-                                          
+
     return l
 
-import serp.core
-from .env import global_indent, core_logger
+
 def gprofile_search(taj):
     publist = []
     for title, authors, journal in taj:
         core_logger.info(f'querying {title}--{",".join(authors)}--{journal}')
         query = title + ' ' + journal
-        pubs = serp.core.search(query, nres=20)
+        pubs = gssa.core.search(query, nres=20)
         pub = pubs[0]
         # gprofile article title may not match the search result one
         # one can use edit distance to quantify the match and choose the best one
         if len(pubs) > 1:
-            core_logger.warn(global_indent + f'more than one result found for "{query}"')
-            core_logger.warn(global_indent + f'returning first result "{pub.title}"')
-        # note the search result is still cached, and serp.core.search returns publications which are also cached
-        publist.append(pub) 
+            core_logger.warn(
+                global_indent + f'more than one result found for "{query}"')
+            core_logger.warn(
+                global_indent + f'returning first result "{pub.title}"')
+        # note the search result is still cached, and gssa.core.search returns publications which are also cached
+        publist.append(pub)
     return publist

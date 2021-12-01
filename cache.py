@@ -1,5 +1,6 @@
-from serp.env import global_cache
+from gssa.env import global_cache
 import json as jsonlib
+
 
 def cache(data, filename, directory=None):
     if directory is not None:
@@ -11,6 +12,7 @@ def cache(data, filename, directory=None):
         _.write(jsonlib.dumps(data))
     return None
 
+
 def load_cache(filename, directory=None):
     if directory is not None:
         filepath = directory.joinpath(filename)
@@ -21,11 +23,12 @@ def load_cache(filename, directory=None):
             return jsonlib.load(_)
     return None
 
+
 def load_cache_paginated(fileprefix, directory=None):
     counter = 1
     data = load_cache(f'{fileprefix}-{counter}', directory)
     queries = []
-    #while data := load_cache(f'{fileprefix}-{counter}') is not None: # strange error of only bool results for data
+    # while data := load_cache(f'{fileprefix}-{counter}') is not None: # strange error of only bool results for data
     while data is not None:
         queries.append(data)
         counter += 1
@@ -33,4 +36,3 @@ def load_cache_paginated(fileprefix, directory=None):
     if queries == []:
         return None
     return queries
-

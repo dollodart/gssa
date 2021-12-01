@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 
+
 def mla_parse_article_name(mla_string):
     st = ''
     start = False
@@ -128,6 +129,7 @@ def vancouver_parse(vancouver_string, mla_string):
 
     return authors, title, journal, date, vol, issue, pagelower, pageupper
 
+
 class Citation:
     def __init__(self,
                  mla,
@@ -162,7 +164,7 @@ class Citation:
             self.issue = struct_data[5]
             self.pagelower = struct_data[6]
             self.pageupper = struct_data[7]
-            
+
         except Exception:
             self.authors = self.title = self.journal = self.date = self.vol = self.issue = self.pagelower = self.pageupper = None
 
@@ -177,18 +179,18 @@ class Citation:
         d = dict()
 
         for adct in json['citations']:
-            d[adct['title'].lower().replace(' ','')] = adct['snippet']
+            d[adct['title'].lower().replace(' ', '')] = adct['snippet']
 
         for ldct in json['links']:
             # eventually, follow some of these links
             # but there is no, at the time of writing, SERP API link (direct link would require self-proxying)
             d[ldct['name'].lower()] = ldct['link']
 
-        if 'refwork' in d.keys(): # hack for bad data
+        if 'refwork' in d.keys():  # hack for bad data
             d['refworks'] = d['refwork']
-            del d['refwork'] 
+            del d['refwork']
 
         if 'nbr6023' in d.keys():
-            del d['nbr6023'] # bad key
+            del d['nbr6023']  # bad key
 
         return cls(**d)
