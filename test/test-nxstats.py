@@ -1,17 +1,102 @@
 import numpy as np
+import networkx
 import networkx.algorithms as nxa
 from gssa.structio import publist2digraph
 from gssa.env import test_logger
-
+from scipy.special import binom
+from scipy.stats import linregress
+from time import time
 
 def characterize(G):
     recip = nxa.reciprocity(G)
+    recipstr = f'reciprocity = {recip:.2f} {"!= 0, not DAG" if recip > 0 else "= 0, is DAG"}'
+
     windex = nxa.wiener_index(G)
+    windexstr = f'Wiener index = {windex:.2f}'
+
     # fh = nxa.flow_hierarchy(G) # flow_hierarchy = 1 - reciprocity?
     acluster = nxa.average_clustering(G)
-    return (f'reciprocity = {recip:.2f}, Wiener index = {windex:.2f}\n' +
-            f'average clustering = {acluster:.2f}')
+    aclusterstr = f'average clustering = {acluster:.2f}'
+    return '\n'.join((recipstr, windexstr, aclusterstr))
 
+def networks_newman_101(G):
+    """
+    Makes a row entry for the graph similar to the rows in table 10.1 of Networks 2nd Ed., by Newman.
+
+    n: number of nodes
+    m: number of edges
+    c: mean degree
+    S: fraction of nodes in the largest component 
+    l: mean of all pairs shortest path lengths
+    alpha: exponent of the degree distribution if power law (note: naive
+      evaluation assuming the entire distribution, rather than possible piecewise
+      as often observed in practice).
+    C: clustering coefficient from Eq. (7.28) of source
+    CWS: clustering coefficient from Eq. (7.31) of source
+    r: degree correlation (Pearson's correlation coefficient for degree)
+    """
+
+    network_name = G.name
+    t0 = time();
+    n = G.number_of_nodes()
+    print(f'nnodes = {n} calculated in {time() - t0:.3f}s'); t0 = time()
+    m = G.number_of_edges()
+    print(f'nnodes = {n} calculated in {time() - t0:.3f}s'); t0 = time()
+
+    if type(G) == networkx.classes.graph.Graph: # there is also G.is_directed()
+        c = n/(2*m) # eqn (6.15)
+        ccs = networkx.connected_components(G)
+    else:
+        c = n/m
+        ccs =  networkx.weakly_connected_components(G)
+    
+    S = len(max(ccs)) / n
+    print(f'S = {S} calculated in {time() - t0:.3f}s'); t0 = time()
+    # computing l
+    # don't use average because unconnected will raise error (technically infinite path length)
+    l = 0
+    for _, adjl in nxa.shortest_paths.all_pairs_bellman_ford_path_length(G):
+        l += sum(adjl.values())
+    l /= n*(n+1) / 2
+    print(f'l = {l} calculated in {time() - t0:.3f}s'); t0 = time()
+
+    # computing alpha
+    # note: estimating the power law coeficient by a logarithmic fit introduces bias
+    # and there are formulas for the degree which introduce no bias
+    sdeg = np.log(sorted(deg for _, deg in G.degree if deg > 0))
+    # don't look at isolated nodes
+    #
+    # one can test for linearity in the logarithm by constant deltas between
+    # adjacent elements and quantify the root variance relative to the mean .
+    # linear regression is used because it returns standard statistics 
+    sdeg, _, r, p, *_ = linregress(range(len(sdeg)), sdeg)
+    if p > .05 or r < .75:
+        sdeg = None # no power law observed
+    print(f'sdeg = {sdeg} calculated in {time() - t0:.3f}s'); t0 = time()
+        
+    # computing C
+    # the number of connected triples is simply the number of combinations of
+    # neighbors for each node, considering it to be the 'center' of the
+    # connected triple.
+    try:
+        ntriangles = nxa.cluster.triangles(G) 
+        nconnected_triples = sum(binom(deg, 2) if deg > 1 else 0 for _, deg in G.degree)
+        C = ntriangles * 3 / nconnected_triples
+        print(f'C = {C} calculated in {time() - t0:.3f}s'); t0 = time()
+    except networkx.exception.NetworkXNotImplemented:
+        C = None
+    try:
+        CWS = nxa.average_clustering(G)
+        print(f'CWS = {CWS} calculated in {time() - t0:.3f}s'); t0 = time()
+    except networkx.exception.NetworkXNotImplemented:
+        CWS = None
+    r = nxa.assortativity.degree_pearson_correlation_coefficient(G)
+    print(f'r = {r} calculated in {time() - t0:.3f}s'); t0 = time()
+
+    return dict(Network=network_name, Type=G.__class__.__name__,
+               n=n, m=m, c=c, # this is only for undirected, need boolean
+               S=S, l=l, C=C,
+               CWS=CWS, r=r)
 
 def centralities_top3(G):
 
@@ -46,6 +131,9 @@ if __name__ == '__main__':
     publist = load_cached_publications_all_data()
 
     G = publist2digraph(publist)
+
+    print(networks_newman_101(G))
+    import sys; sys.exit()
 
     st1 = characterize(G)
     G.remove_nodes_from([x[0] for x in G.out_degree if x[1] < 1])
