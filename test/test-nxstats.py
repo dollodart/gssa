@@ -127,20 +127,16 @@ def degree_deciles(G):
     return np.quantile(ind, q), np.quantile(outd, q), np.quantile(rat, q)
 
 
-if __name__ == '__main__':
-    from gssa.core import load_cached_publications_all_data
-    publist = load_cached_publications_all_data()
+def test_networks_101(G):
+    test_logger.info(networks_newman_101(G))
 
-    G = publist2digraph(publist)
-
-    print(networks_newman_101(G))
-    import sys; sys.exit()
-
+def test_characterize(G):
     st1 = characterize(G)
     G.remove_nodes_from([x[0] for x in G.out_degree if x[1] < 1])
     st2 = characterize(G)
     test_logger.info(f'{st1} {st2}')
 
+def test_degree_deciles(G):
     ind, outd, rat = degree_deciles(G)
     test_logger.info('in-degree deciles ' + '-'.join(f'{x:.1f}' for x in ind))
     test_logger.info('out-degree deciles ' +
@@ -148,13 +144,27 @@ if __name__ == '__main__':
     test_logger.info('out-degree/in-degree deciles ' +
                      '-'.join(f'{x:.1E}' for x in rat))
 
+def test_centralities(G):
     top3s = centralities_top3(G)
     for k in top3s:
         test_logger.info(str(k))
         for pub, value in top3s[k]:
             test_logger.info(f'{pub.title} has centrality {value:.2f}')
 
-    G2 = publist2authordigraph(publist)
+def test_author_bipartition(G2):
     part1, part2 = nxa.community.kernighan_lin_bisection(G2.to_undirected())
     x1 = len(part1) / (len(part1) + len(part2))
-    print(f'community partition for author citations into fraction {x1*100:.0f}%')
+    test_logger.info(f'community partition for author citations into fraction {x1*100:.0f}%')
+
+if __name__ == '__main__':
+    from gssa.core import load_cached_publications_all_data
+    publist = load_cached_publications_all_data()
+
+    G = publist2digraph(publist)
+    test_networks_101(G)
+    test_characterize(G)
+    test_degree_deciles(G)
+    test_centralities(G)
+
+    G2 = publist2authordigraph(publist)
+    test_author_bipartition(G2)
