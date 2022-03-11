@@ -1,7 +1,7 @@
 import numpy as np
 import networkx
 import networkx.algorithms as nxa
-from gssa.structio import publist2digraph
+from gssa.structio import publist2digraph, publist2authordigraph
 from gssa.env import test_logger
 from scipy.special import binom
 from scipy.stats import linregress
@@ -67,7 +67,7 @@ def networks_newman_101(G):
     # don't look at isolated nodes
     #
     # one can test for linearity in the logarithm by constant deltas between
-    # adjacent elements and quantify the root variance relative to the mean .
+    # adjacent elements and quantify the root variance relative to the mean.
     # linear regression is used because it returns standard statistics 
     sdeg, _, r, p, *_ = linregress(range(len(sdeg)), sdeg)
     if p > .05 or r < .75:
@@ -99,10 +99,11 @@ def networks_newman_101(G):
                CWS=CWS, r=r)
 
 def centralities_top3(G):
+    # note for DAGs (like ideal citation graphs), eigenvector_centrality is zero. use PageRank, instead.
 
     top3s = dict()
     for alg in (nxa.centrality.degree_centrality,
-                nxa.centrality.eigenvector_centrality,
+                nxa.centrality.eigenvector_centrality, 
                 nxa.centrality.closeness_centrality,
                 nxa.centrality.betweenness_centrality):
         try:
@@ -152,3 +153,8 @@ if __name__ == '__main__':
         test_logger.info(str(k))
         for pub, value in top3s[k]:
             test_logger.info(f'{pub.title} has centrality {value:.2f}')
+
+    G2 = publist2authordigraph(publist)
+    part1, part2 = nxa.community.kernighan_lin_bisection(G2.to_undirected())
+    x1 = len(part1) / (len(part1) + len(part2))
+    print(f'community partition for author citations into fraction {x1*100:.0f}%')
