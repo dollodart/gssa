@@ -7,18 +7,6 @@ from scipy.special import binom
 from scipy.stats import linregress
 from time import time
 
-def characterize(G):
-    recip = nxa.reciprocity(G)
-    recipstr = f'reciprocity = {recip:.2f} {"!= 0, not DAG" if recip > 0 else "= 0, is DAG"}'
-
-    windex = nxa.wiener_index(G)
-    windexstr = f'Wiener index = {windex:.2f}'
-
-    # fh = nxa.flow_hierarchy(G) # flow_hierarchy = 1 - reciprocity?
-    acluster = nxa.average_clustering(G)
-    aclusterstr = f'average clustering = {acluster:.2f}'
-    return '\n'.join((recipstr, windexstr, aclusterstr))
-
 def networks_newman_101(G):
     """
     Makes a row entry for the graph similar to the rows in table 10.1 of Networks 2nd Ed., by Newman.
@@ -98,6 +86,15 @@ def networks_newman_101(G):
                S=S, l=l, C=C,
                CWS=CWS, r=r)
 
+def characterize_directed(G):
+    """
+    These are for properties only for directed graphs.
+    """
+    recip = nxa.reciprocity(G)
+    recipstr = f'reciprocity = {recip:.2f} {"!= 0, not DAG" if recip > 0 else "= 0, is DAG"}'
+
+    return '\n'.join((recipstr,))
+
 def centralities_top3(G):
     # note for DAGs (like ideal citation graphs), eigenvector_centrality is zero. use PageRank, instead.
 
@@ -130,12 +127,6 @@ def degree_deciles(G):
 def test_networks_101(G):
     test_logger.info(networks_newman_101(G))
 
-def test_characterize(G):
-    st1 = characterize(G)
-    G.remove_nodes_from([x[0] for x in G.out_degree if x[1] < 1])
-    st2 = characterize(G)
-    test_logger.info(f'{st1} {st2}')
-
 def test_degree_deciles(G):
     ind, outd, rat = degree_deciles(G)
     test_logger.info('in-degree deciles ' + '-'.join(f'{x:.1f}' for x in ind))
@@ -156,15 +147,18 @@ def test_author_bipartition(G2):
     x1 = len(part1) / (len(part1) + len(part2))
     test_logger.info(f'community partition for author citations into fraction {x1*100:.0f}%')
 
+def test_characterize_directed(G2):
+    print(characterize_directed(G))
+
 if __name__ == '__main__':
     from gssa.core import load_cached_publications_all_data
     publist = load_cached_publications_all_data()
 
     G = publist2digraph(publist)
     test_networks_101(G)
-    test_characterize(G)
     test_degree_deciles(G)
     test_centralities(G)
 
     G2 = publist2authordigraph(publist)
     test_author_bipartition(G2)
+    test_characterize_directed(G2)
